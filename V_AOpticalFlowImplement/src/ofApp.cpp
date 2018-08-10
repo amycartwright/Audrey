@@ -3,19 +3,32 @@
 
 void ofApp::setup()
 {
+    ofSetFullscreen(true);
+    
+    //setup for the webcam
     video.listDevices();
     video.setDeviceID(0);
-    video.initGrabber(640,480);
+    video.initGrabber(ofGetWindowWidth(),ofGetWindowHeight());
+    
+    //setup for the data input film
+    film.load("AudreyInputMovementData.mp4");
+    film.play();
+    film.setVolume(10);
+    
+    //set up for the optical flow
     calculatedFlow = false;
     phaseX = 0;
     phaseY = 0;
+    
+    //setup for serial connection
     message.setup();
-    //ofSetFullscreen(true);
-}
+    
+} /*END*/
 
 //--------------------------------------------------------------
 void ofApp::update(){
     video.update(); //Decode the new frame if needed
+    film.update();
     
     if(fabs (avgX) > 0.5) phaseX += avgX; //increase phaseX by avgX
     if(fabs (avgY) > 0.5) phaseY += avgY; //increase phaseY by avgY
@@ -24,29 +37,33 @@ void ofApp::update(){
     phaseX = MAX(MIN(ofGetWidth()/2, phaseX),-ofGetWidth()/2);
     phaseY = MAX(MIN(ofGetHeight()/2, phaseY),-ofGetHeight()/2);
     
-    if ( video.isFrameNew() ){
-        
-        if ( gray1.bAllocated ) {
+    if (video.isFrameNew()){
+        //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
+        if (gray1.bAllocated){
             gray2 = gray1;
-            calculatedFlow = true; //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
+            calculatedFlow = true;
         }
         
         //Convert to ofxCv images
         ofPixels & pixels = video.getPixels();
-        currentColor.setFromPixels( pixels );
-        
-        float decimate = 0.25;//Decimate images to 25% (makes calculations faster + works like a blurr too)
+        currentColor.setFromPixels(pixels);
+        //Decimate images to 25% (makes calculations faster + works like a blurr too)
+
+        float decimate = 0.25;
         ofxCvColorImage imageDecimated1;
-        imageDecimated1.allocate( currentColor.width * decimate, currentColor.height * decimate );
-        imageDecimated1.scaleIntoMe( currentColor, CV_INTER_AREA );//High-quality resize
+        imageDecimated1.allocate(currentColor.width * decimate, currentColor.height * decimate);
+        //High-quality resize
+        imageDecimated1.scaleIntoMe(currentColor, CV_INTER_AREA);
         gray1 = imageDecimated1;
         
-        if ( gray2.bAllocated ) {
-            Mat img1( gray1.getCvImage() );  //Create OpenCV images
-            Mat img2( gray2.getCvImage() );
-            Mat flow;                        //Image for flow
+        if (gray2.bAllocated){
+            //Create OpenCV images
+            Mat img1(gray1.getCvImage());
+            Mat img2(gray2.getCvImage());
+            //Image for flow
+            Mat flow;
             //Computing optical flow (https://goo.gl/jm1Vfr - explanation of parameters)
-            calcOpticalFlowFarneback( img1, img2, flow, 0.7, 3, 11, 5, 5, 1.1, OPTFLOW_FARNEBACK_GAUSSIAN);
+            calcOpticalFlowFarneback(img1, img2, flow, 0.7, 3, 11, 5, 5, 1.1, OPTFLOW_FARNEBACK_GAUSSIAN);
             //Split flow into separate images
             vector<Mat> flowPlanes;
             split( flow, flowPlanes );
@@ -58,86 +75,79 @@ void ofApp::update(){
         }
     }
     
-    //---- Timing the program ----
+//-------------- Timing the Program --------------
     
-    int minutes = 2;
-    int totalMillis = minutes * 60 * 1000; //180k
-    time = ofMap(ofGetElapsedTimeMillis(), 0, totalMillis, 0, 1, true);
+//    int minutes = 2;
+//    int totalMillis = minutes * 60 * 1000; //180k
+//    time = ofMap(ofGetElapsedTimeMillis(), 0, totalMillis, 0, 1, true);
     
     
     //program to exit at 3min.
    // if (time>=1) ofExit();
     
-}
+} /*END*/
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofBackground(0);	//Set the background color
+
     numOfEntries = 0;
     sumX = 0;
     sumY = 0;
     avgX = 0;
     avgY = 0;
     
-     video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    //Draw the webcam footage
+    //video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    
+    //Draw the loaded film
+    film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
 
-        if (calculatedFlow)
-        {
-            
-            ofSetColor( 255, 255, 255 );
+        if (calculatedFlow){
+            ofSetColor(255, 255, 255);
             
             int w = gray1.width;
             int h = gray1.height;
             
-            
             //Input images + optical flow
             ofPushMatrix();
-            ofScale( 4, 4 );
+            ofScale(4, 4);
             
             //Optical flow
             float *flowXPixels = flowX.getPixelsAsFloats();
             float *flowYPixels = flowY.getPixelsAsFloats();
             
-            for (int y=0; y<h; y+=5) {
-                for (int x=0; x<w; x+=5) {
+            for (int y=0; y<h; y+=5){
+                for (int x=0; x<w; x+=5){
                     float fx = flowXPixels[ x + w * y ];
                     float fy = flowYPixels[ x + w * y ];
                     //Draw only long vectors
-                    if ( fabs( fx ) + fabs( fy ) > 1 ) {
-                        
+                    if (fabs(fx) + fabs(fy) > 1){
                         if(showFlow == true){
-                            ofDrawRectangle( x-0.5, y-0.5, 1, 1 );
-                            ofDrawLine( x, y, x + fx, y + fy );
+                            ofDrawRectangle(x-0.5, y-0.5, 1, 1);
+                            ofDrawLine(x, y, x + fx, y + fy);
                         }
-                        
                         sumX += fx;
                         sumY += fy;
                         numOfEntries ++;
                     }
                 }
             }
-            
             ofPopMatrix();
-            
         }
     
+    //If flow is detected find the average flow
     if (numOfEntries>0){
         avgX = sumX / numOfEntries;
         avgY = sumY / numOfEntries;
     }
     
+    //Draw a circle at the average point of flow
     ofPushMatrix();
     ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2);
-
-
-    
     if(showAverage == true){
         ofPushStyle();
-        
         ofSetColor(255);
-        ofDrawCircle(-phaseX, -phaseY, 50);
-
-        
+        ofDrawCircle(-phaseX, -phaseY, 40);
         ofPopStyle();
     }
     
@@ -152,6 +162,14 @@ void ofApp::draw(){
     
     ofPopMatrix();
     
+    ofVec3f vec = ofVec3f(phaseX,phaseY,1);
+    delta(vec, dlt);
+    cout << 't' << dlt << endl;
+    cout << 'o' << vec << endl;
+    
+    
+//-------------- Communicating with Arduino --------------
+    
     if(phaseX >= 0){
       //  message.sceneOne();
     }
@@ -159,12 +177,7 @@ void ofApp::draw(){
     if(phaseY <= 0){
         message.sceneTwo();
     }
-    
-    ofVec3f vec = ofVec3f(phaseX,phaseY,1);
-    delta(vec, dlt);
-     cout << 't' << dlt << endl;
-    cout << 'o' << vec << endl;
-}
+} /*END*/
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
@@ -173,11 +186,12 @@ void ofApp::keyPressed(int key){
     
     if(key == '2') showAverage = !showAverage;
     
-}
+} /*END*/
 //--------------------------------------------------------------
 float ofApp::sq(float d){
+    
     return d * d;
-}
+} /*END*/
 //--------------------------------------------------------------
 void ofApp::delta(ofVec3f &cartesian, ofVec3f &delta){
     
@@ -204,7 +218,7 @@ void ofApp::delta(ofVec3f &cartesian, ofVec3f &delta){
     delta.y = sqrt(deltaDiagonalRod2 - sq(deltaTower2X - cartesian.x) - sq(deltaTower2Y - cartesian.y)) + cartesian.z;
     
     delta.z = sqrt(deltaDiagonalRod2 - sq(deltaTower3X - cartesian.x) - sq(deltaTower3Y - cartesian.y)) + cartesian.z;
-}
+} /*END*/
                    
                    
                    

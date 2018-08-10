@@ -18,6 +18,7 @@ public:
     float sq(float);
     
     ofVideoGrabber video;
+    ofVideoPlayer film;
     bool calculatedFlow;
     
     ofxCvColorImage currentColor;		//First and second original images
@@ -30,7 +31,7 @@ public:
     float phaseX, phaseY;
     float time;
     
-    bool showFlow = true;
+    bool showFlow = false;
     bool showAverage = true;
     
     float circleXpos;
