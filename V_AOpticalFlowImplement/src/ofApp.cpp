@@ -17,11 +17,16 @@ void ofApp::setup()
     
     //set up for the optical flow
     calculatedFlow = false;
-    phaseX = 0;
-    phaseY = 0;
+    phase.x = 0;
+    phase.y = 0;
     
     //setup for serial connection
     message.setup();
+    
+    //setup for gui
+    gui.setup();
+    gui.add(threshold.set("Threshold", 128, 0, 20));
+    threshold = 1;
     
 } /*END*/
 
@@ -29,13 +34,6 @@ void ofApp::setup()
 void ofApp::update(){
     video.update(); //Decode the new frame if needed
     film.update();
-    
-    if(fabs (avgX) > 0.5) phaseX += avgX; //increase phaseX by avgX
-    if(fabs (avgY) > 0.5) phaseY += avgY; //increase phaseY by avgY
-    
-    //Clamp the value so that it is not possible for the average data to exceed the bounds of the window
-    phaseX = MAX(MIN(ofGetWidth()/2, phaseX),-ofGetWidth()/2);
-    phaseY = MAX(MIN(ofGetHeight()/2, phaseY),-ofGetHeight()/2);
     
     if (video.isFrameNew()){
         //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
@@ -91,10 +89,10 @@ void ofApp::update(){
 void ofApp::draw(){
 
     numOfEntries = 0;
-    sumX = 0;
-    sumY = 0;
-    avgX = 0;
-    avgY = 0;
+    sum.x = 0;
+    sum.y = 0;
+    avg.x = 0;
+    avg.y = 0;
     
     //Draw the webcam footage
     //video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
@@ -123,13 +121,13 @@ void ofApp::draw(){
 
                     //Draw only long vectors
                     //Change the threshold (no. at the end) to change the ammount of flow detected
-                    if (fabs(fx) + fabs(fy) > 5){
+                    if (fabs(fx) + fabs(fy) > threshold){
                         if(showFlow == true){
                             ofDrawRectangle(x-0.5, y-0.5, 1, 1);
                             ofDrawLine(x, y, x + fx, y + fy);
                         }
-                        sumX += fx;
-                        sumY += fy;
+                        sum.x += fx;
+                        sum.y += fy;
                         numOfEntries ++;
                     }
                 }
@@ -137,25 +135,33 @@ void ofApp::draw(){
             ofPopMatrix();
         }
     
-    //If flow is detected find the average flow
+    //If flow is detected find the average flow and increase to get more movement
     if (numOfEntries>0){
-        avgX = sumX / numOfEntries;
-        avgY = sumY / numOfEntries;
-        
-        //More movement
-        avgX *= 10;
-        avgY *= 10;
+        avg = sum / numOfEntries;
+        avg *= 10;
     }
     
+  // -------------------------------FIX THIS--------------------------------------------
+    
     //Low Pass filter - calculate the average of the current and previous positions
-    ofVec3f avg = ofVec3f(avgX, avgY);
-    currentPos.push_back(ofVec3f(avgX, avgY));
+    ofVec2f tempAvg;
+    currentPos.push_back(ofVec2f(avg.x, avg.y));
     
     if(currentPos.size() > 1){
         float f = 0.5; //adapt this to adjust the proportions between current and prev
-        avg = f * currentPos[1] + (1-f) * currentPos[0]; //low pass filter for additional smoothing add more points to average ensurin that the coefficient is always equal to 1
-
+        tempAvg = f * currentPos[1] + (1-f) * currentPos[0]; //low pass filter for additional smoothing add more points to average ensuring that the coefficient is always equal to 1
     }
+    
+    //avg = tempAvg;
+    
+   // -----------------------------------------------------------------------------------
+    
+    if(fabs (avg.x) > 0.5) phase.x += avg.x; //increase phaseX by avgX
+    if(fabs (avg.y) > 0.5) phase.y += avg.y; //increase phaseY by avgY
+    
+    //Clamp the value so that it is not possible for the average data to exceed the bounds of the window
+    phase.x = MAX(MIN(ofGetWidth()/2-40, phase.x),-ofGetWidth()/2+40);
+    phase.y = MAX(MIN(ofGetHeight()/2-40, phase.y),-ofGetHeight()/2+40);
     
     //Draw a circle at the average point of flow
     ofPushMatrix();
@@ -163,36 +169,36 @@ void ofApp::draw(){
     if(showAverage == true){
         ofPushStyle();
         ofSetColor(255);
-        ofDrawCircle(phaseX, phaseY, 40);
+        ofDrawCircle(phase.x, -phase.y, 40);
         ofPopStyle();
     }
     
-//    if(ofGetFrameNum() % 20 == 0){
-//         cout << 'x' << phaseX << endl;
-//        // cout << 'a' << avgX << endl;
-//         cout << 'y' << phaseY << endl;
-//       //  cout << 'a' << avgY << endl;
-//        
-//   
-//    }
-    
     ofPopMatrix();
     
-    ofVec3f vec = ofVec3f(phaseX,phaseY,1);
+    //PAssing to the delta algorithm
+    ofVec3f vec = ofVec3f(phase.x,phase.y,1);
     delta(vec, dlt);
-//    cout << 't' << dlt << endl;
-//    cout << 'o' << vec << endl;
+    //cout << 't' << dlt << endl;
+    //cout << 'o' << vec << endl;
     
+    //Draw the gui
+    ofPushMatrix();
+    gui.draw();
+    ofPopMatrix();
+    
+    //For Debugging
+    if(ofGetFrameNum() % 20 == 0){
+        cout << 'p' << phase << endl;
+        cout << 'a' << avg << endl;
+        cout << 't' << tempAvg << endl;
+    }
     
 //-------------- Communicating with Arduino --------------
     
-    if(phaseX >= 0){
-      //  message.sceneOne();
-    }
+    if(phase.x >= 0) //message.sceneOne();
     
-    if(phaseY <= 0){
-        message.sceneTwo();
-    }
+    if(phase.y <= 0) message.sceneTwo();
+    
 } /*END*/
 
 //--------------------------------------------------------------
@@ -207,6 +213,7 @@ void ofApp::keyPressed(int key){
 float ofApp::sq(float d){
     
     return d * d;
+    
 } /*END*/
 //--------------------------------------------------------------
 void ofApp::delta(ofVec3f &cartesian, ofVec3f &delta){
@@ -224,7 +231,7 @@ void ofApp::delta(ofVec3f &cartesian, ofVec3f &delta){
     float deltaTower1X = - sin60 * deltaRadius;
     float deltaTower1Y = -cos60 * deltaRadius;
     float deltaTower2X = sin60 * deltaRadius;
-   float deltaTower2Y = -cos60 * deltaRadius;
+    float deltaTower2Y = -cos60 * deltaRadius;
     float deltaTower3X = 0.0;
     float deltaTower3Y = deltaRadius;
     
@@ -234,6 +241,7 @@ void ofApp::delta(ofVec3f &cartesian, ofVec3f &delta){
     delta.y = sqrt(deltaDiagonalRod2 - sq(deltaTower2X - cartesian.x) - sq(deltaTower2Y - cartesian.y)) + cartesian.z;
     
     delta.z = sqrt(deltaDiagonalRod2 - sq(deltaTower3X - cartesian.x) - sq(deltaTower3Y - cartesian.y)) + cartesian.z;
+    
 } /*END*/
                    
                    

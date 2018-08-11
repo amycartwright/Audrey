@@ -3,6 +3,7 @@
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "Message.hpp"
+#include "ofxGui.h"
 
 using namespace cv;
 
@@ -24,19 +25,27 @@ public:
     ofxCvColorImage currentColor;		//First and second original images
     ofxCvGrayscaleImage gray1, gray2;	//Decimated grayscaled images
     ofxCvFloatImage flowX, flowY;		//Resulted optical flow in x and y axes
+    
     Message message;
     
-    float sumX, sumY, avgX, avgY;
-    ofVec2f avg;
-    int numOfEntries;
-    float phaseX, phaseY;
+//    float sumX, sumY;
+//    float avgX, avgY;
+//    float phaseX, phaseY;
     float time;
+    int numOfEntries;
+    
+    ofVec2f sum;
+    ofVec2f avg;
+    ofVec2f phase;
     
     bool showFlow = false;
     bool showAverage = true;
     
-    float circleXpos;
-    float circleYpos;
-    
     deque <ofVec2f> currentPos;
+    
+    ofxPanel gui;
+    ofParameter<float> threshold;
+    
+   
+    
 };
