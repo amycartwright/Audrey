@@ -27,6 +27,7 @@ public:
     Message message;
     
     float sumX, sumY, avgX, avgY;
+    ofVec2f avg;
     int numOfEntries;
     float phaseX, phaseY;
     float time;
@@ -36,4 +37,6 @@ public:
     
     float circleXpos;
     float circleYpos;
+    
+    deque <ofVec2f> currentPos;
 };

@@ -13,7 +13,7 @@ void ofApp::setup()
     //setup for the data input film
     film.load("AudreyInputMovementData.mp4");
     film.play();
-    film.setVolume(10);
+    film.setVolume(20);
     
     //set up for the optical flow
     calculatedFlow = false;
@@ -120,8 +120,10 @@ void ofApp::draw(){
                 for (int x=0; x<w; x+=5){
                     float fx = flowXPixels[ x + w * y ];
                     float fy = flowYPixels[ x + w * y ];
+
                     //Draw only long vectors
-                    if (fabs(fx) + fabs(fy) > 1){
+                    //Change the threshold (no. at the end) to change the ammount of flow detected
+                    if (fabs(fx) + fabs(fy) > 5){
                         if(showFlow == true){
                             ofDrawRectangle(x-0.5, y-0.5, 1, 1);
                             ofDrawLine(x, y, x + fx, y + fy);
@@ -139,6 +141,20 @@ void ofApp::draw(){
     if (numOfEntries>0){
         avgX = sumX / numOfEntries;
         avgY = sumY / numOfEntries;
+        
+        //More movement
+        avgX *= 10;
+        avgY *= 10;
+    }
+    
+    //Low Pass filter - calculate the average of the current and previous positions
+    ofVec3f avg = ofVec3f(avgX, avgY);
+    currentPos.push_back(ofVec3f(avgX, avgY));
+    
+    if(currentPos.size() > 1){
+        float f = 0.5; //adapt this to adjust the proportions between current and prev
+        avg = f * currentPos[1] + (1-f) * currentPos[0]; //low pass filter for additional smoothing add more points to average ensurin that the coefficient is always equal to 1
+
     }
     
     //Draw a circle at the average point of flow
@@ -147,7 +163,7 @@ void ofApp::draw(){
     if(showAverage == true){
         ofPushStyle();
         ofSetColor(255);
-        ofDrawCircle(-phaseX, -phaseY, 40);
+        ofDrawCircle(phaseX, phaseY, 40);
         ofPopStyle();
     }
     
@@ -164,8 +180,8 @@ void ofApp::draw(){
     
     ofVec3f vec = ofVec3f(phaseX,phaseY,1);
     delta(vec, dlt);
-    cout << 't' << dlt << endl;
-    cout << 'o' << vec << endl;
+//    cout << 't' << dlt << endl;
+//    cout << 'o' << vec << endl;
     
     
 //-------------- Communicating with Arduino --------------
