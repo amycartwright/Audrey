@@ -24,6 +24,11 @@ class ofApp : public ofBaseApp{
     ofVec3f origin;
     ofVec3f pivotAbs;
     ofVec3f normal;
+    ofVec3f m1, m2, m3; //motors
+    ofVec3f s1, s2, s3; //springs??
+    float tempPos1, tempPos2, tempPos3;
+    
+    
     
 		
 };
