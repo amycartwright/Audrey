@@ -30,6 +30,8 @@ void ofApp::setup()
     threshold = 1;
     minDist = 0.5;
     
+    soundScore.load("Vocal.wav");
+    
 } /*END*/
 
 //--------------------------------------------------------------
@@ -77,13 +79,10 @@ void ofApp::update(){
     
 //-------------- Timing the Program --------------
     
-//    int minutes = 2;
-//    int totalMillis = minutes * 60 * 1000; //180k
-//    time = ofMap(ofGetElapsedTimeMillis(), 0, totalMillis, 0, 1, true);
-    
-    
-    //program to exit at 3min.
-   // if (time>=1) ofExit();
+    //End the program at the end of the music
+        if (soundScore.getPosition() >= 0.96) {
+            ofExit();
+        }
     
 } /*END*/
 
@@ -100,7 +99,7 @@ void ofApp::draw(){
     //video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     
     //Draw the loaded film
-    film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    if(soundScore.getPosition() > 0) film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
 
         if (calculatedFlow){
             ofSetColor(255, 255, 255);
@@ -209,21 +208,62 @@ void ofApp::draw(){
         cout << 't' << tempAvg << endl;
     }
     
+    ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
+    
 //-------------- Communicating with Arduino --------------
     
-    if(phase.x >= 0) //message.sceneOne();
-    
-    if(phase.y <= 0) message.sceneTwo();
+    /*
+     //Choreographed movement
+     //Begin sending data to arduino at 1min into music, stop at 2min
+     if (soundScore.getPosition() > 0.18 && soundScore.getPosition() < 0.28){
+        message.sceneOne(avg);
+     }
+        //Send the data to the arduino
+        else if (soundScore.getPosition() > 0.28 && soundScore.getPosition() < 0.36){
+            message.sceneThree(avg);
+        }
+            //Store the data that is collected from movement during this time
+            else if(soundScore.getPosition() > 0.36 && soundScore.getPosition() < 0.50){
+                storedData.push_back(avg);
+            }
+                //Send the stored data to the arduino
+                else if (soundScore.getPosition() > 0.50 && soundScore.getPosition() < 0.69){
+                    count++;
+                    message.sceneTwo(storedData[count % storedData.size()]);
+                }
+                    //Send the stored data that has randomness interjected
+                        else if(soundScore.getPosition() > 0.69 && soundScore.getPosition() < 0.81){
+                        message.sceneFour(dataWithRandom);
+                    }
+                        //Begin sending data to arduino at 4:01 and run until tae end
+                            else if (soundScore.getPosition() > 0.92 && soundScore.getPosition() < 0.94){
+                            message.sceneOne(avg);
+                        }
+     */
+
     
 } /*END*/
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+ 
+     switch (key) {
+   
+    case '1':
+        showFlow = !showFlow;
+        break;
     
-    if(key == '1') showFlow = !showFlow;
+    case '2':
+        showAverage = !showAverage;
+        break;
     
-    if(key == '2') showAverage = !showAverage;
+    //Start sound score when letter 'p' is pressed
+    case 'p':
+         soundScore.play();
+         break;
     
+}
+
 } /*END*/
 //--------------------------------------------------------------
 float ofApp::sq(float d){

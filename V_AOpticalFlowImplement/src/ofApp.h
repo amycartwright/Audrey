@@ -28,9 +28,7 @@ public:
     
     Message message;
     
-//    float sumX, sumY;
-//    float avgX, avgY;
-//    float phaseX, phaseY;
+
     float time;
     int numOfEntries;
     
@@ -47,6 +45,7 @@ public:
     ofParameter<float> threshold;
     ofParameter<float> minDist;
     
+    ofSoundPlayer soundScore;
    
     
 };
