@@ -13,7 +13,7 @@ void ofApp::setup()
     //setup for the data input film
     film.load("AudreyInputMovementData.mp4");
     film.play();
-    film.setVolume(20);
+    film.setVolume(0);
     
     //set up for the optical flow
     calculatedFlow = false;
@@ -25,17 +25,12 @@ void ofApp::setup()
     
     //setup for gui
     gui.setup();
-    
-    
-    
-    
     gui.add(pyrScale.set("PyrScale", 0.7, 0, .99));
     gui.add(levels.set("Levels", 3, 1, 8));
     gui.add(winSize.set("WindowSize", 40, 0, 70));
     gui.add(iterations.set("Iterations", 5, 1, 8));
     gui.add(polyN.set("PolyN", 5, 5, 10));
     gui.add(polySigma.set("PolySigma", 1.1, 1.1, 2));
-    
     gui.add(showAverage.set("Show Average", true));
     gui.add(showFlow.set("Show Flow", true));
     gui.add(threshold.set("Threshold", 1, 0, 20));
@@ -105,8 +100,6 @@ void ofApp::draw(){
     sum.y = 0;
     avg.x = 0;
     avg.y = 0;
-    
-    
     
     //Draw the webcam footage
     video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
