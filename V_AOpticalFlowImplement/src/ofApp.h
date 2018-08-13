@@ -43,9 +43,10 @@ public:
     
     ofxPanel gui;
     ofParameter<float> threshold;
-    ofParameter<float> minDist;
+    ofParameter<float> winSize;
     
     ofSoundPlayer soundScore;
+    int lowPassSize  = 5;
    
     
 };

@@ -25,11 +25,10 @@ void ofApp::setup()
     
     //setup for gui
     gui.setup();
-    gui.add(threshold.set("Threshold", 128, 0, 20));
-    gui.add(minDist.set("Minimum Distance", 128, 0, 20));
-    threshold = 1;
-    minDist = 0.5;
-    
+    gui.add(threshold.set("Threshold", 1, 0, 20));
+    gui.add(winSize.set("WindowSize", 40, 0, 70));
+
+    //setup for sound
     soundScore.load("Vocal.wav");
     
 } /*END*/
@@ -65,7 +64,8 @@ void ofApp::update(){
             //Image for flow
             Mat flow;
             //Computing optical flow (https://goo.gl/jm1Vfr - explanation of parameters)
-            calcOpticalFlowFarneback(img1, img2, flow, 0.7, 3, 11, 5, 5, 1.1, OPTFLOW_FARNEBACK_GAUSSIAN);
+            calcOpticalFlowFarneback(img1, img2, flow, 0.7, 3, 40, 5, 5, 1.1, OPTFLOW_FARNEBACK_GAUSSIAN);
+            // calcOpticalFlowFarneback(img1, img2, flow, 0.5, 4, 40, 2, 7, 1.5, OPTFLOW_FARNEBACK_GAUSSIAN);
             //Split flow into separate images
             vector<Mat> flowPlanes;
             split( flow, flowPlanes );
@@ -79,7 +79,7 @@ void ofApp::update(){
     
 //-------------- Timing the Program --------------
     
-    //End the program at the end of the music
+        //End the program at the end of the music
         if (soundScore.getPosition() >= 0.96) {
             ofExit();
         }
@@ -96,7 +96,7 @@ void ofApp::draw(){
     avg.y = 0;
     
     //Draw the webcam footage
-    //video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     
     //Draw the loaded film
     if(soundScore.getPosition() > 0) film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
@@ -142,8 +142,6 @@ void ofApp::draw(){
         avg *= 10;
     }
     
-  // -------------------------------FIX THIS--------------------------------------------
-    
     //Low Pass filter - calculate the average of the current and previous positions
     ofVec2f tempAvg;
     currentPos.push_back(ofVec2f(avg.x, avg.y));
@@ -152,27 +150,23 @@ void ofApp::draw(){
     float distY;
     
     if(currentPos.size() > 1){
-        float f = 0.5; //adapt this to adjust the proportions between current and prev
-        tempAvg = f * currentPos[currentPos.size()-1] + (1-f) * currentPos[currentPos.size()-2]; //low pass filter for additional smoothing add more points to average ensuring that the coefficient is always equal to 1
-        
-        distX = fabs(currentPos[currentPos.size()-1].x - currentPos[currentPos.size()-2].x);
-        distY = fabs(currentPos[currentPos.size()-1].y - currentPos[currentPos.size()-2].y);
+        //low pass filter for additional smoothing add more points to average ensuring that the coefficient is always equal to 1
+        for(int i = 0; i < currentPos.size(); i++){
+            tempAvg += currentPos[i];
+        }
+        tempAvg /= currentPos.size();
     }
     
+    while(currentPos.size() > lowPassSize){
+        currentPos.pop_front();
+    }
+    
+    //avg is updated after being passed through the low pass filter
     avg = tempAvg;
     
-    if(distX < 0.5 && distY < 0.5){
-        
-        avg.x = 0;
-        avg.y = 0;
-    }
-    
-    
-    
-   // -----------------------------------------------------------------------------------
-    
-    if(fabs (avg.x) > 2) phase.x += avg.x; //increase phaseX by avgX
-    if(fabs (avg.y) > 2) phase.y += avg.y; //increase phaseY by avgY
+    //Increment phase with avg only if the absolute of avg is greater than 0.5
+    if(fabs (avg.x) > 0.5) phase.x += avg.x;
+    if(fabs (avg.y) > 0.5) phase.y += avg.y;
     
     //Clamp the value so that it is not possible for the average data to exceed the bounds of the window
     phase.x = MAX(MIN(ofGetWidth()/2-40, phase.x),-ofGetWidth()/2+40);
@@ -184,17 +178,15 @@ void ofApp::draw(){
     if(showAverage == true){
         ofPushStyle();
         ofSetColor(255);
-        ofDrawCircle(phase.x, -phase.y, 40);
+        ofDrawCircle(-phase.x, -phase.y, 40);
         ofPopStyle();
     }
     
     ofPopMatrix();
     
-    //PAssing to the delta algorithm
+    //Passing to the delta algorithm
     ofVec3f vec = ofVec3f(phase.x,phase.y,1);
     delta(vec, dlt);
-    //cout << 't' << dlt << endl;
-    //cout << 'o' << vec << endl;
     
     //Draw the gui
     ofPushMatrix();
@@ -203,9 +195,10 @@ void ofApp::draw(){
     
     //For Debugging
     if(ofGetFrameNum() % 20 == 0){
-        cout << 'p' << phase << endl;
-        cout << 'a' << avg << endl;
-        cout << 't' << tempAvg << endl;
+        //cout << 'p' << phase << endl;
+        //cout << 't' << tempAvg << endl;
+        //cout << 't' << dlt << endl;
+        //cout << 'o' << vec << endl;
     }
     
     ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
