@@ -26,7 +26,9 @@ void ofApp::setup()
     //setup for gui
     gui.setup();
     gui.add(threshold.set("Threshold", 128, 0, 20));
+    gui.add(minDist.set("Minimum Distance", 128, 0, 20));
     threshold = 1;
+    minDist = 0.5;
     
 } /*END*/
 
@@ -147,17 +149,31 @@ void ofApp::draw(){
     ofVec2f tempAvg;
     currentPos.push_back(ofVec2f(avg.x, avg.y));
     
+    float distX;
+    float distY;
+    
     if(currentPos.size() > 1){
         float f = 0.5; //adapt this to adjust the proportions between current and prev
-        tempAvg = f * currentPos[1] + (1-f) * currentPos[0]; //low pass filter for additional smoothing add more points to average ensuring that the coefficient is always equal to 1
+        tempAvg = f * currentPos[currentPos.size()-1] + (1-f) * currentPos[currentPos.size()-2]; //low pass filter for additional smoothing add more points to average ensuring that the coefficient is always equal to 1
+        
+        distX = fabs(currentPos[currentPos.size()-1].x - currentPos[currentPos.size()-2].x);
+        distY = fabs(currentPos[currentPos.size()-1].y - currentPos[currentPos.size()-2].y);
     }
     
-    //avg = tempAvg;
+    avg = tempAvg;
+    
+    if(distX < 0.5 && distY < 0.5){
+        
+        avg.x = 0;
+        avg.y = 0;
+    }
+    
+    
     
    // -----------------------------------------------------------------------------------
     
-    if(fabs (avg.x) > 0.5) phase.x += avg.x; //increase phaseX by avgX
-    if(fabs (avg.y) > 0.5) phase.y += avg.y; //increase phaseY by avgY
+    if(fabs (avg.x) > 2) phase.x += avg.x; //increase phaseX by avgX
+    if(fabs (avg.y) > 2) phase.y += avg.y; //increase phaseY by avgY
     
     //Clamp the value so that it is not possible for the average data to exceed the bounds of the window
     phase.x = MAX(MIN(ofGetWidth()/2-40, phase.x),-ofGetWidth()/2+40);

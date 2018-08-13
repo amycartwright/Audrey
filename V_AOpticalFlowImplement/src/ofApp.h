@@ -38,13 +38,14 @@ public:
     ofVec2f avg;
     ofVec2f phase;
     
-    bool showFlow = false;
+    bool showFlow = true;
     bool showAverage = true;
     
     deque <ofVec2f> currentPos;
     
     ofxPanel gui;
     ofParameter<float> threshold;
+    ofParameter<float> minDist;
     
    
     
