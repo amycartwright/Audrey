@@ -25,8 +25,20 @@ void ofApp::setup()
     
     //setup for gui
     gui.setup();
-    gui.add(threshold.set("Threshold", 1, 0, 20));
+    
+    
+    
+    
+    gui.add(pyrScale.set("PyrScale", 0.7, 0, .99));
+    gui.add(levels.set("Levels", 3, 1, 8));
     gui.add(winSize.set("WindowSize", 40, 0, 70));
+    gui.add(iterations.set("Iterations", 5, 1, 8));
+    gui.add(polyN.set("PolyN", 5, 5, 10));
+    gui.add(polySigma.set("PolySigma", 1.1, 1.1, 2));
+    
+    gui.add(showAverage.set("Show Average", true));
+    gui.add(showFlow.set("Show Flow", true));
+    gui.add(threshold.set("Threshold", 1, 0, 20));
 
     //setup for sound
     soundScore.load("Vocal.wav");
@@ -64,8 +76,7 @@ void ofApp::update(){
             //Image for flow
             Mat flow;
             //Computing optical flow (https://goo.gl/jm1Vfr - explanation of parameters)
-            calcOpticalFlowFarneback(img1, img2, flow, 0.7, 3, 40, 5, 5, 1.1, OPTFLOW_FARNEBACK_GAUSSIAN);
-            // calcOpticalFlowFarneback(img1, img2, flow, 0.5, 4, 40, 2, 7, 1.5, OPTFLOW_FARNEBACK_GAUSSIAN);
+            calcOpticalFlowFarneback(img1, img2, flow, pyrScale, levels, winSize, iterations, polyN, polySigma, OPTFLOW_FARNEBACK_GAUSSIAN);
             //Split flow into separate images
             vector<Mat> flowPlanes;
             split( flow, flowPlanes );
@@ -95,11 +106,15 @@ void ofApp::draw(){
     avg.x = 0;
     avg.y = 0;
     
+    
+    
     //Draw the webcam footage
     video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     
     //Draw the loaded film
     if(soundScore.getPosition() > 0) film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    
+    if(guiDraw == true) gui.draw();
 
         if (calculatedFlow){
             ofSetColor(255, 255, 255);
@@ -188,11 +203,6 @@ void ofApp::draw(){
     ofVec3f vec = ofVec3f(phase.x,phase.y,1);
     delta(vec, dlt);
     
-    //Draw the gui
-    ofPushMatrix();
-    gui.draw();
-    ofPopMatrix();
-    
     //For Debugging
     if(ofGetFrameNum() % 20 == 0){
         //cout << 'p' << phase << endl;
@@ -243,11 +253,7 @@ void ofApp::keyPressed(int key){
      switch (key) {
    
     case '1':
-        showFlow = !showFlow;
-        break;
-    
-    case '2':
-        showAverage = !showAverage;
+        guiDraw = !guiDraw;
         break;
     
     //Start sound score when letter 'p' is pressed

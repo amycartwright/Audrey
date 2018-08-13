@@ -28,7 +28,6 @@ public:
     
     Message message;
     
-
     float time;
     int numOfEntries;
     
@@ -36,14 +35,20 @@ public:
     ofVec2f avg;
     ofVec2f phase;
     
-    bool showFlow = true;
-    bool showAverage = true;
+    bool guiDraw = false;
     
     deque <ofVec2f> currentPos;
     
     ofxPanel gui;
     ofParameter<float> threshold;
     ofParameter<float> winSize;
+    ofParameter<float> pyrScale;
+    ofParameter<float> polySigma;
+    ofParameter<int> levels;
+    ofParameter<float> iterations;
+    ofParameter<float> polyN;
+    ofParameter<bool> showFlow;
+    ofParameter<bool> showAverage;
     
     ofSoundPlayer soundScore;
     int lowPassSize  = 5;
