@@ -7,19 +7,19 @@
 #include <stdio.h>
 #include "ofMain.h"
 
-
-
 #endif /* message_h */
 class Message{
     
-public:
+    public:
     
     Message();
     
+    ofSerial serial; //set up a serial object
+    
     void setup();
     void sceneOne(ofVec3f);
-    void sceneTwo();
-    
-    ofSerial serial;
+    void sceneTwo(ofVec3f);
+    void sceneThree(ofVec3f);
+    void sceneFour(ofVec3f);
     
 };

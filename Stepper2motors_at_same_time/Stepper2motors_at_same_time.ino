@@ -1,5 +1,3 @@
-
-
 #include <AccelStepper.h>
 
 // Define three steppers and the pins they will use
@@ -7,9 +5,9 @@ AccelStepper stepper1(AccelStepper::DRIVER, 9, 8); //We use 'DRIVER' here as we 
 AccelStepper stepper2(AccelStepper::DRIVER, 7, 6);
 AccelStepper stepper3(AccelStepper::DRIVER, 5, 4);
 
-  int pos[][3] = {{1600,  0, 0  },
-                 {0,  1600, 0  },
-                 {0,    0, 1600}};
+  int pos[][3] = {{200,  0, 0  },
+                 {00,  200, 0  },
+                 {0,    0, 200}};
 
 int count;
 
@@ -17,6 +15,10 @@ int count;
 void setup() { 
    
 Serial.begin(115200);
+
+stepper1.setCurrentPosition(0);
+stepper2.setCurrentPosition(0);
+stepper2.setCurrentPosition(0);
 
   stepper1.setMaxSpeed(3000);
   stepper1.setAcceleration(500);
@@ -37,14 +39,11 @@ void loop() {
       count = 0;
     }
     
-    stepper1.moveTo(pos[count][0]);
+    stepper1.runToNewPosition(pos[count][0]);
     stepper2.moveTo(pos[count][1]);
     stepper3.moveTo(pos[count][2]);
 
   }
-  
-
-  
   stepper1.run();
   stepper2.run();
   stepper3.run();
