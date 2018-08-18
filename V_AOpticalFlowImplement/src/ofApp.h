@@ -35,6 +35,10 @@ public:
     ofVec2f avg;
     ofVec2f phase;
     
+    float sumX, sumY;
+    float avgX, avgY;
+    float phaseX, phaseY;
+    
     bool guiDraw = false;
     
     deque <ofVec2f> currentPos;

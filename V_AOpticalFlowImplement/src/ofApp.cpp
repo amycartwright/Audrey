@@ -8,6 +8,7 @@ void ofApp::setup()
     //setup for the webcam
     video.listDevices();
     video.setDeviceID(0);
+    video.setDesiredFrameRate(60);
     video.initGrabber(ofGetWindowWidth(),ofGetWindowHeight());
     
     //setup for the data input film
@@ -42,6 +43,7 @@ void ofApp::setup()
 
 //--------------------------------------------------------------
 void ofApp::update(){
+
     video.update(); //Decode the new frame if needed
     film.update();
     
@@ -55,8 +57,8 @@ void ofApp::update(){
         //Convert to ofxCv images
         ofPixels & pixels = video.getPixels();
         currentColor.setFromPixels(pixels);
+        
         //Decimate images to 25% (makes calculations faster + works like a blurr too)
-
         float decimate = 0.25;
         ofxCvColorImage imageDecimated1;
         imageDecimated1.allocate(currentColor.width * decimate, currentColor.height * decimate);
@@ -148,14 +150,12 @@ void ofApp::draw(){
     if (numOfEntries>0){
         avg = sum / numOfEntries;
         avg *= 10;
+
     }
     
     //Low Pass filter - calculate the average of the current and previous positions
     ofVec2f tempAvg;
     currentPos.push_back(ofVec2f(avg.x, avg.y));
-    
-    float distX;
-    float distY;
     
     if(currentPos.size() > 1){
         //low pass filter for additional smoothing add more points to average ensuring that the coefficient is always equal to 1
@@ -182,29 +182,28 @@ void ofApp::draw(){
     
     //Draw a circle at the average point of flow
     ofPushMatrix();
-    ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2);
+    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
     if(showAverage == true){
-        ofPushStyle();
         ofSetColor(255);
-        ofDrawCircle(-phase.x, -phase.y, 40);
-        ofPopStyle();
+        ofDrawCircle(phase.x, -phase.y, 40);
     }
-    
     ofPopMatrix();
     
-    //Passing to the delta algorithm
-    ofVec3f vec = ofVec3f(phase.x,phase.y,1);
-    delta(vec, dlt);
+    float newX = ofMap(phase.x, -ofGetWidth()/2, ofGetWidth()/2, 0, 640);
+    float newY = ofMap(phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, 480);
     
-    //For Debugging
     if(ofGetFrameNum() % 20 == 0){
-        //cout << 'p' << phase << endl;
-        //cout << 't' << tempAvg << endl;
-        //cout << 't' << dlt << endl;
-        //cout << 'o' << vec << endl;
+        cout << 'x' << newX << endl;
+        cout << 'y' << newY << endl;
+        
     }
     
+    //Passing to the delta algorithm
+    ofVec3f vec = ofVec3f(newX, newY, 1);
+    delta(vec, dlt);
+    
     ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
+    
     
 //-------------- Communicating with Arduino --------------
     
@@ -212,15 +211,15 @@ void ofApp::draw(){
      //Choreographed movement
      //Begin sending data to arduino at 1min into music, stop at 2min
      if (soundScore.getPosition() > 0.18 && soundScore.getPosition() < 0.28){
-        message.sceneOne(avg);
+        message.sceneOne(vec);
      }
         //Send the data to the arduino
         else if (soundScore.getPosition() > 0.28 && soundScore.getPosition() < 0.36){
-            message.sceneThree(avg);
+            message.sceneThree(vec);
         }
             //Store the data that is collected from movement during this time
             else if(soundScore.getPosition() > 0.36 && soundScore.getPosition() < 0.50){
-                storedData.push_back(avg);
+                storedData.push_back(vec);
             }
                 //Send the stored data to the arduino
                 else if (soundScore.getPosition() > 0.50 && soundScore.getPosition() < 0.69){
@@ -233,10 +232,9 @@ void ofApp::draw(){
                     }
                         //Begin sending data to arduino at 4:01 and run until tae end
                             else if (soundScore.getPosition() > 0.92 && soundScore.getPosition() < 0.94){
-                            message.sceneOne(avg);
+                            message.sceneOne(vec);
                         }
      */
-
     
 } /*END*/
 
