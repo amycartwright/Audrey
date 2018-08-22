@@ -8,12 +8,11 @@ void ofApp::setup()
     //setup for the webcam
     video.listDevices();
     video.setDeviceID(0);
-    video.setDesiredFrameRate(60);
     video.initGrabber(ofGetWindowWidth(),ofGetWindowHeight());
     
     //setup for the data input film
-    film.load("AudreyInputMovementData.mp4");
-    film.play();
+    film.load("AudreyInputMovementData1.mp4");
+    
     film.setVolume(0);
     
     //set up for the optical flow
@@ -33,11 +32,13 @@ void ofApp::setup()
     gui.add(polyN.set("PolyN", 5, 5, 10));
     gui.add(polySigma.set("PolySigma", 1.1, 1.1, 2));
     gui.add(showAverage.set("Show Average", true));
-    gui.add(showFlow.set("Show Flow", true));
+    gui.add(showFlow.set("Show Flow", false));
     gui.add(threshold.set("Threshold", 1, 0, 20));
+     gui.add(dampen.set("Dampen", 0.1, 0, 2));
 
     //setup for sound
-    soundScore.load("Vocal.wav");
+    soundScore.load("VocalEditAmy.wav");
+    
     
 } /*END*/
 
@@ -46,6 +47,7 @@ void ofApp::update(){
 
     video.update(); //Decode the new frame if needed
     film.update();
+
     
     if (video.isFrameNew()){
         //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
@@ -88,7 +90,7 @@ void ofApp::update(){
 //-------------- Timing the Program --------------
     
         //End the program at the end of the music
-        if (soundScore.getPosition() >= 0.96) {
+        if (soundScore.getPosition() >= 0.97) {
             ofExit();
         }
     
@@ -104,10 +106,15 @@ void ofApp::draw(){
     avg.y = 0;
     
     //Draw the webcam footage
-    video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    //video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     
     //Draw the loaded film
-    if(soundScore.getPosition() > 0) film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    if(soundScore.getPosition() > 0) {
+        film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+        film.play();
+    }
+    
+    ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
     
     if(guiDraw == true) gui.draw();
 
@@ -176,6 +183,10 @@ void ofApp::draw(){
     if(fabs (avg.x) > 0.5) phase.x += avg.x;
     if(fabs (avg.y) > 0.5) phase.y += avg.y;
     
+    if(fabs(phase.x) > 1 ) phase.x -= dampen * ofSign(phase.x) * sqrt(fabs(phase.x));
+    if(fabs(phase.y) > 1 ) phase.y -= dampen * ofSign(phase.y) * sqrt(fabs(phase.y));
+    
+    
     //Clamp the value so that it is not possible for the average data to exceed the bounds of the window
     phase.x = MAX(MIN(ofGetWidth()/2-40, phase.x),-ofGetWidth()/2+40);
     phase.y = MAX(MIN(ofGetHeight()/2-40, phase.y),-ofGetHeight()/2+40);
@@ -202,7 +213,6 @@ void ofApp::draw(){
     ofVec3f vec = ofVec3f(newX, newY, 1);
     delta(vec, dlt);
     
-    ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
     
     
 //-------------- Communicating with Arduino --------------
@@ -210,30 +220,35 @@ void ofApp::draw(){
     /*
      //Choreographed movement
      //Begin sending data to arduino at 1min into music, stop at 2min
-     if (soundScore.getPosition() > 0.18 && soundScore.getPosition() < 0.28){
+     if (soundScore.getPosition() > 0.064 && soundScore.getPosition() < 0.077){
         message.sceneOne(vec);
      }
         //Send the data to the arduino
-        else if (soundScore.getPosition() > 0.28 && soundScore.getPosition() < 0.36){
-            message.sceneThree(vec);
+        else if (soundScore.getPosition() > 0.135 && soundScore.getPosition() < 0.216){
+            message.sceneOne(vec);
         }
             //Store the data that is collected from movement during this time
-            else if(soundScore.getPosition() > 0.36 && soundScore.getPosition() < 0.50){
-                storedData.push_back(vec);
+            else if(soundScore.getPosition() > 0.216 && soundScore.getPosition() < 0.302){
+                message.sceneOne(vec);
             }
                 //Send the stored data to the arduino
-                else if (soundScore.getPosition() > 0.50 && soundScore.getPosition() < 0.69){
-                    count++;
-                    message.sceneTwo(storedData[count % storedData.size()]);
+                else if (soundScore.getPosition() > 0.302 && soundScore.getPosition() < 0.400){
+                    message.sceneOne(vec);
                 }
                     //Send the stored data that has randomness interjected
-                        else if(soundScore.getPosition() > 0.69 && soundScore.getPosition() < 0.81){
-                        message.sceneFour(dataWithRandom);
+                        else if(soundScore.getPosition() > 0.400 && soundScore.getPosition() < 0.476){
+                        message.sceneOne(vec);
                     }
                         //Begin sending data to arduino at 4:01 and run until tae end
-                            else if (soundScore.getPosition() > 0.92 && soundScore.getPosition() < 0.94){
+                            else if (soundScore.getPosition() > 0.476 && soundScore.getPosition() < 0.602){
                             message.sceneOne(vec);
                         }
+                                else if (soundScore.getPosition() > 0.602 && soundScore.getPosition() < 0.796){
+                                    message.sceneOne(vec);
+                                }
+                                    else if (soundScore.getPosition() > 0.796 && soundScore.getPosition() < 0.970){
+                                        message.sceneOne(vec);
+                                    }
      */
     
 } /*END*/

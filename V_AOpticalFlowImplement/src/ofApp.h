@@ -54,8 +54,10 @@ public:
     ofParameter<bool> showFlow;
     ofParameter<bool> showAverage;
     
+    ofParameter<float> dampen;
+
+    
     ofSoundPlayer soundScore;
     int lowPassSize  = 5;
    
-    
 };
