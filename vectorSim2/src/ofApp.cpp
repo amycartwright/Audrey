@@ -131,6 +131,7 @@ void ofApp::mouseDragged(int x, int y, int button){
             b[i].rotate(angle, axis);
         }
         normal.rotate(angle, axis);
+        
         //    ofRotateDeg(angle, axis.x, axis.y, axis.z);
     }
 
