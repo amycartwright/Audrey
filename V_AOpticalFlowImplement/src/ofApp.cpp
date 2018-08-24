@@ -183,9 +183,9 @@ void ofApp::draw(){
     if(fabs (avg.x) > 0.5) phase.x += avg.x;
     if(fabs (avg.y) > 0.5) phase.y += avg.y;
     
+    //Always have a slight pull tot he center to avoid getting stuck on one side
     if(fabs(phase.x) > 1 ) phase.x -= dampen * ofSign(phase.x) * sqrt(fabs(phase.x));
     if(fabs(phase.y) > 1 ) phase.y -= dampen * ofSign(phase.y) * sqrt(fabs(phase.y));
-    
     
     //Clamp the value so that it is not possible for the average data to exceed the bounds of the window
     phase.x = MAX(MIN(ofGetWidth()/2-40, phase.x),-ofGetWidth()/2+40);
