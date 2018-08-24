@@ -3,7 +3,7 @@
 
 void ofApp::setup()
 {
-    ofSetFullscreen(true);
+   // ofSetFullscreen(true);
     
     //setup for the webcam
     video.listDevices();
@@ -201,55 +201,64 @@ void ofApp::draw(){
     ofPopMatrix();
     
     float newX = ofMap(phase.x, -ofGetWidth()/2, ofGetWidth()/2, 0, 640);
-    float newY = ofMap(phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, 480);
+    float newY = ofMap(-phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, 480);
     
-    if(ofGetFrameNum() % 20 == 0){
-        cout << 'x' << newX << endl;
-        cout << 'y' << newY << endl;
-        
-    }
+  
     
     //Passing to the delta algorithm
     ofVec3f vec = ofVec3f(newX, newY, 1);
+    
+    if(ofGetFrameNum() % 20 == 0){
+//        cout << 'x' << newX << endl;
+//        cout << 'y' << newY << endl;
+        cout << 'y' << vec << endl;
+    }
    
     
     
     
     //-------------- Communicating with Arduino --------------
     
-    /*
+    
      //Choreographed movement
      //Begin sending data to arduino at 1min into music, stop at 2min
      if (soundScore.getPosition() > 0.064 && soundScore.getPosition() < 0.077){
      message.sceneOne(vec);
      }
+    
      //Send the data to the arduino
      else if (soundScore.getPosition() > 0.135 && soundScore.getPosition() < 0.216){
      message.sceneOne(vec);
      }
+    
      //Store the data that is collected from movement during this time
      else if(soundScore.getPosition() > 0.216 && soundScore.getPosition() < 0.302){
      message.sceneOne(vec);
      }
+    
      //Send the stored data to the arduino
      else if (soundScore.getPosition() > 0.302 && soundScore.getPosition() < 0.400){
      message.sceneOne(vec);
      }
+    
      //Send the stored data that has randomness interjected
      else if(soundScore.getPosition() > 0.400 && soundScore.getPosition() < 0.476){
      message.sceneOne(vec);
      }
+    
      //Begin sending data to arduino at 4:01 and run until tae end
      else if (soundScore.getPosition() > 0.476 && soundScore.getPosition() < 0.602){
      message.sceneOne(vec);
      }
+    
      else if (soundScore.getPosition() > 0.602 && soundScore.getPosition() < 0.796){
      message.sceneOne(vec);
      }
+    
      else if (soundScore.getPosition() > 0.796 && soundScore.getPosition() < 0.970){
      message.sceneOne(vec);
      }
-     */
+    
     
 } /*END*/
 
