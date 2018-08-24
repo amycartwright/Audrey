@@ -7,7 +7,7 @@ void ofApp::setup(){
     pivotAbs.set(0, 0, 0); //Ball joint - central point
     normal.set(0, -1, 0);
     
-    // set motor position
+    // set motors position
     m[0].set(0, 1, 1);
     
     m[1].set(m[0]);
@@ -16,7 +16,7 @@ void ofApp::setup(){
     m[2].set(m[0]);
     m[2].rotate(-120, normal);
     
-    // set base attach position
+    // set positions of base to motors points
     b[0].set(0, 0, 1);
     
     b[1].set(b[0]);
@@ -44,8 +44,7 @@ void ofApp::draw(){
     curRot.getRotate(angle, axis);
     
     //apply the quaternion's rotation to the viewport and draw the sphere
-    ofRotate(angle, axis.x, axis.y, axis.z);
-    ofRotate(angle, axis.x, axis.y, axis.z);
+    ofRotateDeg(angle, axis.x, axis.y, axis.z);
     
 //    systemRot.getRotate(angle, axis);
 //    for (int i = 0; i < 3; i++) {
