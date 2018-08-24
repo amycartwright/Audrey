@@ -60,7 +60,11 @@ void ofApp::draw(){
     curRot.getRotate(angle, axis);
     
     //apply the quaternion's rotation to the viewport and draw the sphere
+<<<<<<< HEAD
     ofRotate(angle, axis.x, axis.y, axis.z);
+=======
+    ofRotateDeg(angle, axis.x, axis.y, axis.z);
+>>>>>>> 0ec519c38672decba746fb9ed36be8e4175acc8d
 
     // *************************** end
     
