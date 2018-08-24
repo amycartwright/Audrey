@@ -28,20 +28,6 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-   
-//    //These values will need to be changed to be variable dependant on each others length
-//    tempPos1 = ofGetWidth()/2 + 100;
-//    tempPos2 = ofGetHeight()/4 + 50;
-//    tempPos3 = 0;
-//
-//    m1.set(tempPos1, tempPos2, tempPos3);
-//    m2.set(tempPos1, tempPos2, tempPos3);
-//    m3.set(tempPos1, tempPos2, tempPos3);
-    
-    // rotate around Y
-//    for (int i = 0; i < 3; i++) {
-//        m[i].rotate(1, normal);
-//    }
     
 }
 
@@ -51,8 +37,6 @@ void ofApp::draw(){
    
     ofPushMatrix();
     ofTranslate(origin);
-    
-    // *************************** start
 
     //Extract the rotation from the current rotation
     ofVec3f axis;
@@ -60,13 +44,8 @@ void ofApp::draw(){
     curRot.getRotate(angle, axis);
     
     //apply the quaternion's rotation to the viewport and draw the sphere
-<<<<<<< HEAD
     ofRotate(angle, axis.x, axis.y, axis.z);
-=======
-    ofRotateDeg(angle, axis.x, axis.y, axis.z);
->>>>>>> 0ec519c38672decba746fb9ed36be8e4175acc8d
-
-    // *************************** end
+    ofRotate(angle, axis.x, axis.y, axis.z);
     
 //    systemRot.getRotate(angle, axis);
 //    for (int i = 0; i < 3; i++) {
@@ -132,8 +111,6 @@ void ofApp::mouseMoved(int x, int y ){
 void ofApp::mouseDragged(int x, int y, int button){
 
     if (shiftKey) {
-        
-    // ************************* start
     
     //every time the mouse is dragged, track the change
     //accumulate the changes inside of curRot through multiplication
@@ -141,9 +118,6 @@ void ofApp::mouseDragged(int x, int y, int button){
     ofQuaternion xRot((y-lastMouse.y)*dampen, ofVec3f(-1,0,0));
     curRot *= yRot*xRot;
     lastMouse.set(x, y);
-        
-    
-    // ************************* end
     
     } else {
         ofQuaternion zRot((x-lastMouse.x)*dampen, ofVec3f(0,0,1));
@@ -166,12 +140,11 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
-    // ************************* start
+
 
     //store the last mouse point when it's first pressed to prevent popping
     lastMouse = ofVec2f(x,y);
-    
-    // ************************* end
+
 
 }
 

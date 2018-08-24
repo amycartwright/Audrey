@@ -29,7 +29,6 @@ class ofApp : public ofBaseApp{
     ofVec3f normal;
     ofVec3f m[3]; //motors
     ofVec3f b[3]; //base
-//    float tempPos1, tempPos2, tempPos3;
     
     // ************************ start
     
