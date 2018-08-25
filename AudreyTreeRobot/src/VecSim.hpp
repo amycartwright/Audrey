@@ -10,5 +10,43 @@
 #define VecSim_hpp
 
 #include <stdio.h>
+#include "ofMain.h"
 
 #endif /* VecSim_hpp */
+
+class VecSim{
+    
+    public:
+    
+    VecSim();
+    
+    void setup();
+    void draw();
+    void calculate(int, int, bool);
+   
+    	
+    
+    ofVec3f origin;
+    ofVec3f pivotAbs;
+    ofVec3f normal;
+    ofVec3f m[3]; //motors
+    ofVec3f b[3]; //base
+    
+    
+    
+    //current state of the rotation
+    ofQuaternion curRot;
+    
+    //a place to store the mouse position so we can measure incremental change
+    ofVec2f lastMouse;
+    
+    //slows down the rotation 1 = 1 degree per pixel
+    float dampen = .25;
+    
+    ofQuaternion systemRot;
+   
+
+    
+    
+};
+

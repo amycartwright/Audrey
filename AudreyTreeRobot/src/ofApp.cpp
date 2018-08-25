@@ -22,6 +22,8 @@ void ofApp::setup()
     
     //setup for serial connection
     message.setup();
+    vecSim.setup();
+    
     
     //setup for gui
     gui.setup();
@@ -35,6 +37,7 @@ void ofApp::setup()
     gui.add(showFlow.set("Show Flow", false));
     gui.add(threshold.set("Threshold", 1, 0, 20));
     gui.add(dampen.set("Dampen", 0.1, 0, 2));
+    gui.add(showVecSim.set("Show Vector Simulation", true));
     
     //setup for sound
     soundScore.load("VocalEditAmy.wav");
@@ -47,7 +50,6 @@ void ofApp::update(){
     
     video.update(); //Decode the new frame if needed
     film.update();
-    
     
     if (video.isFrameNew()){
         //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
@@ -99,6 +101,8 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
+    if(showVecSim) vecSim.draw();
+    
     numOfEntries = 0;
     sum.x = 0;
     sum.y = 0;
@@ -116,7 +120,7 @@ void ofApp::draw(){
     
     ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
     
-    if(guiDraw == true) gui.draw();
+    if(guiDraw) gui.draw();
     
     if (calculatedFlow){
         ofSetColor(255, 255, 255);
@@ -194,7 +198,7 @@ void ofApp::draw(){
     //Draw a circle at the average point of flow
     ofPushMatrix();
     ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
-    if(showAverage == true){
+    if(showAverage){
         ofSetColor(255);
         ofDrawCircle(phase.x, -phase.y, 40);
     }
@@ -211,9 +215,6 @@ void ofApp::draw(){
     
     //Passing to the delta algorithm
     ofVec3f vec = ofVec3f(newX, newY, 1);
-    delta(vec, dlt);
-    
-    
     
     //-------------- Communicating with Arduino --------------
     
@@ -267,40 +268,43 @@ void ofApp::keyPressed(int key){
         soundScore.play();
         break;
         
+        case ' ':
+        vecSim.origin.z = 0;
+        break;
+        
+        case OF_KEY_LEFT_SHIFT:
+        shiftKey = true;
+        break;
+    }
+     
+} /*END*/
+
+//--------------------------------------------------------------
+void ofApp::keyReleased(int key){
+    
+    if (key == OF_KEY_LEFT_SHIFT) {
+        shiftKey = false;
     }
     
-} /*END*/
+}
+
 //--------------------------------------------------------------
-float ofApp::sq(float d){
-    
-    return d * d;
-    
-} /*END*/
+void ofApp::mouseDragged(int x, int y, int button){
+
+        vecSim.calculate(x, y, shiftKey);
+}
+
 //--------------------------------------------------------------
-void ofApp::delta(ofVec3f &cartesian, ofVec3f &delta){
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
     
-    float deltaDiagonalRod = 300;
-    float deltaSmoothRodOffset = 212.357;
-    float deltaEffectorOffset = 30.0;
-    float deltaCarriageOffset = 30.0;
-    float deltaRadius = (deltaSmoothRodOffset - deltaEffectorOffset - deltaCarriageOffset);
+    vecSim.origin.z += scrollY;
+}
+
+//--------------------------------------------------------------
+void ofApp::mousePressed(int x, int y, int button){
     
-    float sin60 = sin(PI/3);
-    float cos60 = 0.5;
-    
-    float deltaDiagonalRod2 = deltaDiagonalRod * deltaDiagonalRod;
-    float deltaTower1X = - sin60 * deltaRadius;
-    float deltaTower1Y = -cos60 * deltaRadius;
-    float deltaTower2X = sin60 * deltaRadius;
-    float deltaTower2Y = -cos60 * deltaRadius;
-    float deltaTower3X = 0.0;
-    float deltaTower3Y = deltaRadius;
+    //store the last mouse point when it's first pressed to prevent popping
+    vecSim.lastMouse = ofVec2f(x,y);
     
     
-    delta.x = sqrt(deltaDiagonalRod2 - sq(deltaTower1X - cartesian.x) - sq(deltaTower1Y - cartesian.y)) + cartesian.z;
-    
-    delta.y = sqrt(deltaDiagonalRod2 - sq(deltaTower2X - cartesian.x) - sq(deltaTower2Y - cartesian.y)) + cartesian.z;
-    
-    delta.z = sqrt(deltaDiagonalRod2 - sq(deltaTower3X - cartesian.x) - sq(deltaTower3Y - cartesian.y)) + cartesian.z;
-    
-} /*END*/
+}

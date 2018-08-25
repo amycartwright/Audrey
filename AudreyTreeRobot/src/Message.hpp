@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "ofMain.h"
 
-#endif /* message_h */
+#endif /* message_hpp */
 class Message{
     
     public:

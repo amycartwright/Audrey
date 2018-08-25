@@ -27,11 +27,6 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
-    
-}
-
-//--------------------------------------------------------------
 void ofApp::draw(){
     ofBackground(0);
    
@@ -44,7 +39,8 @@ void ofApp::draw(){
     curRot.getRotate(angle, axis);
     
     //apply the quaternion's rotation to the viewport and draw the sphere
-    ofRotateDeg(angle, axis.x, axis.y, axis.z);
+    ofRotate(angle, axis.x, axis.y, axis.z);
+    ofRotate(angle, axis.x, axis.y, axis.z);
     
 //    systemRot.getRotate(angle, axis);
 //    for (int i = 0; i < 3; i++) {
@@ -102,11 +98,6 @@ void ofApp::keyReleased(int key){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
 
     if (shiftKey) {
@@ -153,32 +144,3 @@ void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
     origin.z += scrollY;
 }
 
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
-}

@@ -15,9 +15,10 @@ class ofApp : public ofBaseApp{
     void update();
     void draw();
     void keyPressed(int key);
-    void delta(ofVec3f&,ofVec3f&);
-    ofVec3f dlt;
-    float sq(float);
+    void keyReleased(int key);
+    void mouseDragged(int x, int y, int button);
+    void mouseScrolled(int x, int y, float scrollX, float scrollY);
+    void mousePressed(int x, int y, int button);
     
     ofVideoGrabber video;
     ofVideoPlayer film;
@@ -28,6 +29,7 @@ class ofApp : public ofBaseApp{
     ofxCvFloatImage flowX, flowY;		//Resulted optical flow in x and y axes
     
     Message message;
+    VecSim vecSim;
     
     float time;
     int numOfEntries;
@@ -54,11 +56,13 @@ class ofApp : public ofBaseApp{
     ofParameter<float> polyN;
     ofParameter<bool> showFlow;
     ofParameter<bool> showAverage;
+    ofParameter<bool> showVecSim;
     
     ofParameter<float> dampen;
     
     
     ofSoundPlayer soundScore;
     int lowPassSize  = 5;
+    bool shiftKey;
     
 };
