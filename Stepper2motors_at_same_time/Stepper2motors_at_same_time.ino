@@ -5,9 +5,9 @@ AccelStepper stepper1(AccelStepper::DRIVER, 9, 8); //We use 'DRIVER' here as we 
 AccelStepper stepper2(AccelStepper::DRIVER, 7, 6);
 AccelStepper stepper3(AccelStepper::DRIVER, 5, 4);
 
-  int pos[][3] = {{200,  0, 0  },
-                 {00,  200, 0  },
-                 {0,    0, 200}};
+  int pos[][3] = {{1000,  0, 0  },
+                 {00,  1000, 0  },
+                 {0,    0, 1000}};
 
 int count;
 
