@@ -22,6 +22,8 @@ void ofApp::setup()
     
     //setup for serial connection
     message.setup();
+    
+    //setup for translating the co-ordinates to the robots 3 point system
     vecSim.setup();
     
     
@@ -38,6 +40,8 @@ void ofApp::setup()
     gui.add(threshold.set("Threshold", 1, 0, 20));
     gui.add(dampen.set("Dampen", 0.1, 0, 2));
     gui.add(showVecSim.set("Show Vector Simulation", true));
+    gui.add(showWebCam.set("Show Web Cam Image", false));
+    gui.add(showSoundPosition.set("Show SoundPosition", true));
     
     //setup for sound
     soundScore.load("VocalEditAmy.wav");
@@ -50,6 +54,8 @@ void ofApp::update(){
     
     video.update(); //Decode the new frame if needed
     film.update();
+    
+    vecSim.update(afterMapping.x, afterMapping.y);
     
     if (video.isFrameNew()){
         //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
@@ -89,8 +95,6 @@ void ofApp::update(){
         }
     }
     
-    //-------------- Timing the Program --------------
-    
     //End the program at the end of the music
     if (soundScore.getPosition() >= 0.97) {
         ofExit();
@@ -101,26 +105,28 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    if(showVecSim) vecSim.draw();
-    
     numOfEntries = 0;
     sum.x = 0;
     sum.y = 0;
     avg.x = 0;
     avg.y = 0;
     
+    if(guiDraw) gui.draw();
+    
+    //Draw the sound position
+    if(showSoundPosition) ofDrawBitmapString(ofToString(soundScore.getPosition()), 20, 20 );
+    
+    //Draw the vecSim diagram
+    if(showVecSim) vecSim.draw();
+    
     //Draw the webcam footage
-    //video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    if(showWebCam) video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     
     //Draw the loaded film
     if(soundScore.getPosition() > 0) {
         film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
         film.play();
     }
-    
-    ofDrawBitmapString(ofToString(soundScore.getPosition()), ofGetWidth()/2, ofGetHeight()/2 + 20);
-    
-    if(guiDraw) gui.draw();
     
     if (calculatedFlow){
         ofSetColor(255, 255, 255);
@@ -203,54 +209,53 @@ void ofApp::draw(){
         ofDrawCircle(phase.x, -phase.y, 40);
     }
     ofPopMatrix();
+
+    //Map to screen width and height to get only positive numbers
+    afterMapping.x = ofMap(phase.x, -ofGetWidth()/2, ofGetWidth()/2, 0, 200);
+    afterMapping.y = ofMap(-phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, 200);
+
+    //Send data to the vecSim to calculate the robots position
+    vecSim.calculate(afterMapping.x, afterMapping.y, shiftKey);
+
+    ofVec3f toSend = ofVec3f(vecSim.w[0],vecSim.w[1],vecSim.w[2]);
+        
+     //Choreographed movement
+     //Begin sending data to arduino at scheduled intervals
+     if (soundScore.getPosition() > 0.064 && soundScore.getPosition() < 0.077){
+         message.sceneOne(toSend);
+        }
     
-    float newX = ofMap(phase.x, -ofGetWidth()/2, ofGetWidth()/2, 0, 640);
-    float newY = ofMap(phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, 480);
+        else if (soundScore.getPosition() > 0.135 && soundScore.getPosition() < 0.216){
+            message.sceneOne(toSend);
+        }
+  
+            else if(soundScore.getPosition() > 0.216 && soundScore.getPosition() < 0.302){
+                    message.sceneOne(toSend);
+            }
+
+                else if (soundScore.getPosition() > 0.302 && soundScore.getPosition() < 0.400){
+                    message.sceneOne(toSend);
+                }
+
+                    else if(soundScore.getPosition() > 0.400 && soundScore.getPosition() < 0.476){
+                        message.sceneOne(toSend);
+                    }
+
+                        else if (soundScore.getPosition() > 0.476 && soundScore.getPosition() < 0.602){
+                            message.sceneOne(toSend);
+                        }
+    
+                            else if (soundScore.getPosition() > 0.602 && soundScore.getPosition() < 0.796){
+                                message.sceneOne(toSend);
+                            }
+    
+                                else if (soundScore.getPosition() > 0.796 && soundScore.getPosition() < 0.970){
+                                    message.sceneOne(toSend);
+                                }
     
     if(ofGetFrameNum() % 20 == 0){
-        cout << 'x' << newX << endl;
-        cout << 'y' << newY << endl;
-        
+        cout << toSend << endl;
     }
-    
-    //Passing to the delta algorithm
-    ofVec3f vec = ofVec3f(newX, newY, 1);
-    
-    //-------------- Communicating with Arduino --------------
-    
-    /*
-     //Choreographed movement
-     //Begin sending data to arduino at 1min into music, stop at 2min
-     if (soundScore.getPosition() > 0.064 && soundScore.getPosition() < 0.077){
-     message.sceneOne(vec);
-     }
-     //Send the data to the arduino
-     else if (soundScore.getPosition() > 0.135 && soundScore.getPosition() < 0.216){
-     message.sceneOne(vec);
-     }
-     //Store the data that is collected from movement during this time
-     else if(soundScore.getPosition() > 0.216 && soundScore.getPosition() < 0.302){
-     message.sceneOne(vec);
-     }
-     //Send the stored data to the arduino
-     else if (soundScore.getPosition() > 0.302 && soundScore.getPosition() < 0.400){
-     message.sceneOne(vec);
-     }
-     //Send the stored data that has randomness interjected
-     else if(soundScore.getPosition() > 0.400 && soundScore.getPosition() < 0.476){
-     message.sceneOne(vec);
-     }
-     //Begin sending data to arduino at 4:01 and run until tae end
-     else if (soundScore.getPosition() > 0.476 && soundScore.getPosition() < 0.602){
-     message.sceneOne(vec);
-     }
-     else if (soundScore.getPosition() > 0.602 && soundScore.getPosition() < 0.796){
-     message.sceneOne(vec);
-     }
-     else if (soundScore.getPosition() > 0.796 && soundScore.getPosition() < 0.970){
-     message.sceneOne(vec);
-     }
-     */
     
 } /*END*/
 
@@ -285,26 +290,10 @@ void ofApp::keyReleased(int key){
     if (key == OF_KEY_LEFT_SHIFT) {
         shiftKey = false;
     }
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
-        vecSim.calculate(x, y, shiftKey);
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
     
     vecSim.origin.z += scrollY;
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-    
-    //store the last mouse point when it's first pressed to prevent popping
-    vecSim.lastMouse = ofVec2f(x,y);
-    
-    
 }

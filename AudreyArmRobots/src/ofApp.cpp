@@ -3,7 +3,7 @@
 
 void ofApp::setup()
 {
-   // ofSetFullscreen(true);
+    ofSetFullscreen(true);
     
     //setup for the webcam
     video.listDevices();

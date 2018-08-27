@@ -23,6 +23,7 @@ class VecSim{
     void setup();
     void draw();
     void calculate(int, int, bool);
+    void update(int, int);
    
     	
     
@@ -38,12 +39,14 @@ class VecSim{
     ofQuaternion curRot;
     
     //a place to store the mouse position so we can measure incremental change
-    ofVec2f lastMouse;
+    ofVec2f lastPos;
     
     //slows down the rotation 1 = 1 degree per pixel
     float dampen = .25;
     
     ofQuaternion systemRot;
+    
+    float w[3];
    
 
     

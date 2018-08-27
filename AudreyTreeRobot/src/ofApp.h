@@ -16,9 +16,7 @@ class ofApp : public ofBaseApp{
     void draw();
     void keyPressed(int key);
     void keyReleased(int key);
-    void mouseDragged(int x, int y, int button);
     void mouseScrolled(int x, int y, float scrollX, float scrollY);
-    void mousePressed(int x, int y, int button);
     
     ofVideoGrabber video;
     ofVideoPlayer film;
@@ -37,6 +35,7 @@ class ofApp : public ofBaseApp{
     ofVec2f sum;
     ofVec2f avg;
     ofVec2f phase;
+    ofVec2f afterMapping = ofVec2f(100, 100);
     
     float sumX, sumY;
     float avgX, avgY;
@@ -57,6 +56,9 @@ class ofApp : public ofBaseApp{
     ofParameter<bool> showFlow;
     ofParameter<bool> showAverage;
     ofParameter<bool> showVecSim;
+    ofParameter<bool> showWebCam;
+    ofParameter<bool> showSoundPosition;
+    
     
     ofParameter<float> dampen;
     
@@ -64,5 +66,6 @@ class ofApp : public ofBaseApp{
     ofSoundPlayer soundScore;
     int lowPassSize  = 5;
     bool shiftKey;
+    ofVec3f vec;
     
 };

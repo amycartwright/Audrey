@@ -50,14 +50,13 @@ void VecSim::draw(){
     
     //apply the quaternion's rotation to the viewport and draw the sphere
     ofRotate(angle, axis.x, axis.y, axis.z);
-    ofRotate(angle, axis.x, axis.y, axis.z);
     
     //    systemRot.getRotate(angle, axis);
     //    for (int i = 0; i < 3; i++) {
     //        b[i].rotate(angle, axis);
     //    }
     //    normal.rotate(angle, axis);
-    ////    ofRotateDeg(angle, axis.x, axis.y, axis.z);
+
     
     // origin-base vectors
     ofSetColor(255, 0, 0);
@@ -82,24 +81,27 @@ void VecSim::draw(){
     ofDrawArrow(50*m[1], 50*b[1], 4);
     ofDrawArrow(50*m[2], 50*b[2], 4);
     
+    
+    w[0] = (b[0] - m[0]).length();
+    w[1] = (b[1] - m[1]).length();
+    w[2] = (b[2] - m[2]).length();
+    
     ofPopMatrix();
 }
-
+//--------------------------------------------------------------
 void VecSim::calculate(int x, int y, bool pressed){
     
     if (pressed) {
         //every time the mouse is dragged, track the change
         //accumulate the changes inside of curRot through multiplication
-        ofQuaternion yRot((x-lastMouse.x)*dampen, ofVec3f(0,1,0));
-        ofQuaternion xRot((y-lastMouse.y)*dampen, ofVec3f(-1,0,0));
+        ofQuaternion yRot((x-lastPos.x)*dampen, ofVec3f(0,1,0));
+        ofQuaternion xRot((y-lastPos.y)*dampen, ofVec3f(-1,0,0));
         curRot *= yRot*xRot;
-        lastMouse.set(x, y);
     }
     else {
-        ofQuaternion zRot((x-lastMouse.x)*dampen, ofVec3f(0,0,1));
-        ofQuaternion xRot((y-lastMouse.y)*dampen, ofVec3f(-1,0,0));
+        ofQuaternion zRot((x-lastPos.x)*dampen, ofVec3f(0,0,1));
+        ofQuaternion xRot((y-lastPos.y)*dampen, ofVec3f(-1,0,0));
         systemRot = zRot*xRot;
-        lastMouse.set(x, y);
     
         ofVec3f axis;
         float angle;
@@ -108,8 +110,11 @@ void VecSim::calculate(int x, int y, bool pressed){
             b[i].rotate(angle, axis);
         }
         normal.rotate(angle, axis);
-    //    ofRotateDeg(angle, axis.x, axis.y, axis.z);
-    
+    }
 }
+//--------------------------------------------------------------
+void VecSim::update(int x, int y){
+
+    lastPos.set(x, y);
 
 }
