@@ -57,34 +57,43 @@ void VecSim::draw(){
     //    }
     //    normal.rotate(angle, axis);
 
+    systemRot.getRotate(angle, axis);
+    
+    ofVec3f normalRot; //normal rotation
+    ofVec3f br[3]; //base rotation
+    
+    for (int i = 0; i < 3; i++) {
+        br[i] = b[i].getRotated(angle, axis);
+    }
+    normalRot = normal.getRotated(angle, axis);
     
     // origin-base vectors
     ofSetColor(255, 0, 0);
-    ofDrawArrow(pivotAbs, 50*b[0], 4);
-    ofDrawArrow(pivotAbs, 50*b[1], 4);
-    ofDrawArrow(pivotAbs, 50*b[2], 4);
+    ofDrawArrow(pivotAbs, 50 * br[0], 4);
+    ofDrawArrow(pivotAbs, 50 * br[1], 4);
+    ofDrawArrow(pivotAbs, 50 * br[2], 4);
     
     // origin-normal vector
     ofSetColor(0, 255, 0);
-    ofDrawArrow(pivotAbs, 50*normal, 4);
+    ofDrawArrow(pivotAbs, 50 * normalRot, 4);
     
     
     // origin-motor vectors
     ofSetColor(0, 0, 255);
-    ofDrawArrow(pivotAbs, 50*m[0], 4);
-    ofDrawArrow(pivotAbs, 50*m[1], 4);
-    ofDrawArrow(pivotAbs, 50*m[2], 4);
+    ofDrawArrow(pivotAbs, 50 * m[0], 4);
+    ofDrawArrow(pivotAbs, 50 * m[1], 4);
+    ofDrawArrow(pivotAbs, 50 * m[2], 4);
     
     // motor-base vectors
     ofSetColor(255, 255, 0);
-    ofDrawArrow(50*m[0], 50*b[0], 4);
-    ofDrawArrow(50*m[1], 50*b[1], 4);
-    ofDrawArrow(50*m[2], 50*b[2], 4);
+    ofDrawArrow(50 * m[0], 50*br[0], 4);
+    ofDrawArrow(50 * m[1], 50*br[1], 4);
+    ofDrawArrow(50 * m[2], 50*br[2], 4);
     
     
-    w[0] = (b[0] - m[0]).length();
-    w[1] = (b[1] - m[1]).length();
-    w[2] = (b[2] - m[2]).length();
+    w[0] = (br[0] - m[0]).length();
+    w[1] = (br[1] - m[1]).length();
+    w[2] = (br[2] - m[2]).length();
     
     ofPopMatrix();
 }
@@ -94,23 +103,23 @@ void VecSim::calculate(int x, int y, bool pressed){
     if (pressed) {
         //every time the mouse is dragged, track the change
         //accumulate the changes inside of curRot through multiplication
-        ofQuaternion yRot((x-lastPos.x)*dampen, ofVec3f(0,1,0));
-        ofQuaternion xRot((y-lastPos.y)*dampen, ofVec3f(-1,0,0));
-        curRot *= yRot*xRot;
+        ofQuaternion yRot(  (x-lastPos.x) * dampen, ofVec3f(0,1,0));
+        ofQuaternion xRot( -(y-lastPos.y) * dampen, ofVec3f(1,0,0));
+        curRot *= yRot * xRot;
+        
+    } else {
+        
+        float nX, nY;
+        nX = x - ofGetWidth()/2;
+        nY = y - ofGetHeight()/2;
+        ofQuaternion zRot( nX * dampen * dampen, ofVec3f(0,0,1));
+        ofQuaternion xRot(-nY * dampen * dampen, ofVec3f(1,0,0));
+        systemRot = zRot * xRot;
+        
     }
-    else {
-        ofQuaternion zRot((x-lastPos.x)*dampen, ofVec3f(0,0,1));
-        ofQuaternion xRot((y-lastPos.y)*dampen, ofVec3f(-1,0,0));
-        systemRot = zRot*xRot;
     
-        ofVec3f axis;
-        float angle;
-        systemRot.getRotate(angle, axis);
-        for (int i = 0; i < 3; i++) {
-            b[i].rotate(angle, axis);
-        }
-        normal.rotate(angle, axis);
-    }
+    lastPos.set(x, y);
+    
 }
 //--------------------------------------------------------------
 void VecSim::update(int x, int y){

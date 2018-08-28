@@ -29,8 +29,8 @@ class VecSim{
     
     ofVec3f origin;
     ofVec3f pivotAbs;
-    ofVec3f normal;
     ofVec3f m[3]; //motors
+    ofVec3f normal;
     ofVec3f b[3]; //base
     
     

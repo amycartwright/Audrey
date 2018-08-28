@@ -80,6 +80,7 @@ void ofApp::update(){
             //Create OpenCV images
             Mat img1(gray1.getCvImage());
             Mat img2(gray2.getCvImage());
+
             //Image for flow
             Mat flow;
             //Computing optical flow (https://goo.gl/jm1Vfr - explanation of parameters)
