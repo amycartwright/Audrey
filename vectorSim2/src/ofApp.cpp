@@ -41,28 +41,39 @@ void ofApp::draw(){
     //Extract the rotation from the current rotation
     ofVec3f axis;
     float angle;
+    
     curRot.getRotate(angle, axis);
     
     //apply the quaternion's rotation to the viewport and draw the sphere
     ofRotateDeg(angle, axis.x, axis.y, axis.z);
     
-//    systemRot.getRotate(angle, axis);
-//    for (int i = 0; i < 3; i++) {
-//        b[i].rotate(angle, axis);
-//    }
-//    normal.rotate(angle, axis);
-////    ofRotateDeg(angle, axis.x, axis.y, axis.z);
+    //    ofPushMatrix();
+    //    {
+    
+    systemRot.getRotate(angle, axis);
+
+    ofVec3f normalRot; //normal rotation
+    ofVec3f br[3]; //base rotation
+
+    for (int i = 0; i < 3; i++) {
+        br[i] = b[i].getRotated(angle, axis);
+    }
+    normalRot = normal.getRotated(angle, axis);
+    
+    //        ofRotateDeg(angle, axis.x, axis.y, axis.z);
     
     // origin-base vectors
     ofSetColor(255, 0, 0);
-    ofDrawArrow(pivotAbs, 50*b[0], 4);
-    ofDrawArrow(pivotAbs, 50*b[1], 4);
-    ofDrawArrow(pivotAbs, 50*b[2], 4);
+    ofDrawArrow(pivotAbs, 50*br[0], 4);
+    ofDrawArrow(pivotAbs, 50*br[1], 4);
+    ofDrawArrow(pivotAbs, 50*br[2], 4);
     
     // origin-normal vector
     ofSetColor(0, 255, 0);
-    ofDrawArrow(pivotAbs, 50*normal, 4);
-
+    ofDrawArrow(pivotAbs, 50*normalRot, 4);
+    
+    //    }
+    //    ofPopMatrix();
     
     // origin-motor vectors
     ofSetColor(0, 0, 255);
@@ -72,9 +83,9 @@ void ofApp::draw(){
     
     // motor-base vectors
     ofSetColor(255, 255, 0);
-    ofDrawArrow(50*m[0], 50*b[0], 4);
-    ofDrawArrow(50*m[1], 50*b[1], 4);
-    ofDrawArrow(50*m[2], 50*b[2], 4);
+    ofDrawArrow(50*m[0], 50*br[0], 4);
+    ofDrawArrow(50*m[1], 50*br[1], 4);
+    ofDrawArrow(50*m[2], 50*br[2], 4);
     
     ofPopMatrix();
     
@@ -85,6 +96,7 @@ void ofApp::keyPressed(int key){
 
     if (key == ' ') {
         origin.z = 0;
+        curRot = ofQuaternion(); // reset global rotation (identity quaternion)
     }
     
     if (key == OF_KEY_LEFT_SHIFT) {
@@ -113,38 +125,40 @@ void ofApp::mouseDragged(int x, int y, int button){
     
     //every time the mouse is dragged, track the change
     //accumulate the changes inside of curRot through multiplication
-    ofQuaternion yRot((x-lastMouse.x)*dampen, ofVec3f(0,1,0));
-    ofQuaternion xRot((y-lastMouse.y)*dampen, ofVec3f(-1,0,0));
+    ofQuaternion yRot(  (x-lastMouse.x) * dampen, ofVec3f(0,1,0));
+    ofQuaternion xRot( -(y-lastMouse.y) * dampen, ofVec3f(1,0,0));
     curRot *= yRot*xRot;
-    lastMouse.set(x, y);
     
     } else {
-        ofQuaternion zRot((x-lastMouse.x)*dampen, ofVec3f(0,0,1));
-        ofQuaternion xRot((y-lastMouse.y)*dampen, ofVec3f(-1,0,0));
+        
+        float nX, nY;
+        nX = x - ofGetWidth()/2;
+        nY = y - ofGetHeight()/2;
+        ofQuaternion zRot( nX * dampen * dampen, ofVec3f(0,0,1));
+        ofQuaternion xRot(-nY * dampen * dampen, ofVec3f(1,0,0));
         systemRot = zRot*xRot;
-        lastMouse.set(x, y);
         
-        ofVec3f axis;
-        float angle;
-        systemRot.getRotate(angle, axis);
-        for (int i = 0; i < 3; i++) {
-            b[i].rotate(angle, axis);
-        }
-        normal.rotate(angle, axis);
+//        ofVec3f axis;
+//        float angle;
+//        systemRot.getRotate(angle, axis);
+//        for (int i = 0; i < 3; i++) {
+//            b[i].rotate(angle, axis);
+//        }
+//        normal.rotate(angle, axis);
         
-        //    ofRotateDeg(angle, axis.x, axis.y, axis.z);
+//    ofRotateDeg(angle, axis.x, axis.y, axis.z);
+
     }
+    
+    lastMouse.set(x, y);
 
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
-
-
     //store the last mouse point when it's first pressed to prevent popping
     lastMouse = ofVec2f(x,y);
-
 
 }
 
