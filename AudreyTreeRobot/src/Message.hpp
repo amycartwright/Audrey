@@ -22,4 +22,10 @@ class Message{
     void sceneThree(ofVec3f);
     void sceneFour(ofVec3f);
     
+    void update();
+    bool flag = true;
+    
+    string msg;
+    void setMessage(char, ofVec3f);
+    void writeMessage(string);
 };

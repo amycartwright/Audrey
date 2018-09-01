@@ -3,7 +3,7 @@
 
 void ofApp::setup()
 {
-    ofSetFullscreen(true);
+    //ofSetFullscreen(true);
     
     //setup for the webcam
     video.listDevices();
@@ -62,8 +62,14 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    if(message.serial.available()) cout << "serial: " << message.serial.readByte() << endl;
-    
+    if(message.serial.available()) {
+        int size = message.serial.available();
+        unsigned char bytes[size];
+        message.serial.readBytes(bytes, size);
+        cout << "serial: " << bytes[1] << endl;
+        message.update(); // check if arduino serial is free
+    }
+
     video.update(); //Decode the new frame if needed
     film.update();
     
@@ -281,9 +287,9 @@ void ofApp::draw(){
      
      */
     
-    if(ofGetFrameNum() % 20 == 0){
-        cout << toSend << endl;
-    }
+//    if(ofGetFrameNum() % 20 == 0){
+//        cout << toSend << endl;
+//    }
     
 } /*END*/
 
@@ -315,6 +321,11 @@ void ofApp::keyPressed(int key){
         case OF_KEY_LEFT_SHIFT:
         shiftKey = true;
         break;
+            
+            case 's':
+            message.setMessage('a', ofVec3f(10,20,30));
+            message.writeMessage(message.msg);
+            break;
     }
      
 } /*END*/
