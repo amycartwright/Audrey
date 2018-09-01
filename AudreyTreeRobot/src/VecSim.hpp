@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "ofMain.h"
 
+
 #endif /* VecSim_hpp */
 
 class VecSim{
@@ -42,14 +43,18 @@ class VecSim{
     ofVec2f lastPos;
     
     //slows down the rotation 1 = 1 degree per pixel
-    float dampen = .25;
+    float dampen = 0.35;
     
     ofQuaternion systemRot;
     
     float w[3];
-   
-
     
+    
+    ofParameter<float> scale_rot;
+    
+    ofParameter<float> base_rad;
+    ofParameter<float> motor_rad;
+    ofParameter<float> base_height;
     
 };
 

@@ -35,7 +35,7 @@ class ofApp : public ofBaseApp{
     ofVec2f sum;
     ofVec2f avg;
     ofVec2f phase;
-    ofVec2f afterMapping = ofVec2f(100, 100);
+    ofVec2f afterMapping = ofVec2f(320, 240);
     
     float sumX, sumY;
     float avgX, avgY;
@@ -58,7 +58,11 @@ class ofApp : public ofBaseApp{
     ofParameter<bool> showVecSim;
     ofParameter<bool> showWebCam;
     ofParameter<bool> showSoundPosition;
+      
+    ofxButton update_vecSys;
+    void upd_vecSysPressed();
     
+    ofParameter<float> toSteps;
     
     ofParameter<float> dampen;
     

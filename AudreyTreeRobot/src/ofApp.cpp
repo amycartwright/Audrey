@@ -3,7 +3,7 @@
 
 void ofApp::setup()
 {
-   // ofSetFullscreen(true);
+    ofSetFullscreen(true);
     
     //setup for the webcam
     video.listDevices();
@@ -42,6 +42,16 @@ void ofApp::setup()
     gui.add(showVecSim.set("Show Vector Simulation", true));
     gui.add(showWebCam.set("Show Web Cam Image", false));
     gui.add(showSoundPosition.set("Show SoundPosition", true));
+    gui.add(vecSim.scale_rot.set("scale rot", 0.125, 0, 1));
+    gui.add(vecSim.motor_rad.set("motor radius", 50, 10, 500));
+    gui.add(vecSim.base_rad.set("base radius", 50, 10, 500));
+    gui.add(vecSim.base_height.set("base height", 50, 10, 500));
+    gui.add(toSteps.set("to steps scaling", 50, 10, 500));
+    gui.add(update_vecSys.setup("update base/motor position"));
+    
+    update_vecSys.addListener(this, &ofApp::upd_vecSysPressed);
+    
+    vecSim.setup();
     
     //setup for sound
     soundScore.load("VocalEditAmy.wav");
@@ -52,10 +62,12 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update(){
     
+    if(message.serial.available()) cout << "serial: " << message.serial.readByte() << endl;
+    
     video.update(); //Decode the new frame if needed
     film.update();
     
-    vecSim.update(afterMapping.x, afterMapping.y);
+//    vecSim.update(afterMapping.x, afterMapping.y);
     
     if (video.isFrameNew()){
         //Only begin the flow algorithm if gray1 is true - this creates a short delay at the start of the program and ensures that movement data can be collected.
@@ -112,22 +124,28 @@ void ofApp::draw(){
     avg.x = 0;
     avg.y = 0;
     
-    if(guiDraw) gui.draw();
+    //Draw the loaded film
+    if(soundScore.getPosition() > 0) {
+        ofSetColor(255);
+        film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+        film.play();
+    }
+    
+    //Draw the webcam footage
+    if(showWebCam) {
+        ofPushStyle();
+        ofSetColor(255, 50);
+        video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+        ofPopStyle();
+    }
     
     //Draw the sound position
     if(showSoundPosition) ofDrawBitmapString(ofToString(soundScore.getPosition()), 20, 20 );
     
+    
     //Draw the vecSim diagram
     if(showVecSim) vecSim.draw();
     
-    //Draw the webcam footage
-    if(showWebCam) video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-    
-    //Draw the loaded film
-    if(soundScore.getPosition() > 0) {
-        film.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-        film.play();
-    }
     
     if (calculatedFlow){
         ofSetColor(255, 255, 255);
@@ -163,6 +181,8 @@ void ofApp::draw(){
         }
         ofPopMatrix();
     }
+    
+    if(guiDraw) gui.draw();
     
     //If flow is detected find the average flow and increase to get more movement
     if (numOfEntries>0){
@@ -212,14 +232,19 @@ void ofApp::draw(){
     ofPopMatrix();
 
     //Map to screen width and height to get only positive numbers
-    afterMapping.x = ofMap(phase.x, -ofGetWidth()/2, ofGetWidth()/2, 0, 200);
-    afterMapping.y = ofMap(-phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, 200);
+    afterMapping.x = ofMap(phase.x, -ofGetWidth()/2, ofGetWidth()/2, 0, ofGetWidth());
+    afterMapping.y = ofMap(-phase.y, -ofGetHeight()/2, ofGetHeight()/2, 0, ofGetHeight());
 
     //Send data to the vecSim to calculate the robots position
     vecSim.calculate(afterMapping.x, afterMapping.y, shiftKey);
 
-    ofVec3f toSend = ofVec3f(vecSim.w[0],vecSim.w[1],vecSim.w[2]);
-        
+    ofVec3f toSend = ofVec3f(vecSim.w[0],vecSim.w[1],vecSim.w[2]).scale(toSteps);
+    
+    if (soundScore.getPosition() > 0){
+        message.sceneOne(toSend);
+    }
+    
+    /*
      //Choreographed movement
      //Begin sending data to arduino at scheduled intervals
      if (soundScore.getPosition() > 0.064 && soundScore.getPosition() < 0.077){
@@ -253,12 +278,21 @@ void ofApp::draw(){
                                 else if (soundScore.getPosition() > 0.796 && soundScore.getPosition() < 0.970){
                                     message.sceneOne(toSend);
                                 }
+     
+     */
     
     if(ofGetFrameNum() % 20 == 0){
         cout << toSend << endl;
     }
     
 } /*END*/
+
+//--------------------------------------------------------------
+void ofApp::upd_vecSysPressed(){
+    
+    vecSim.setup();
+
+}
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){

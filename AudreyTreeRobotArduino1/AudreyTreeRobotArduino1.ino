@@ -1,16 +1,16 @@
 #include <AccelStepper.h>
 
 // Define three steppers and the pins they will use
-AccelStepper stepper1(AccelStepper::DRIVER, 9, 8); //We use 'DRIVER' here as we are using a driver that requires two pins 
+AccelStepper stepper1(AccelStepper::DRIVER, 9, 8); //We use 'DRIVER' here as we are using a driver that requires two pins
 AccelStepper stepper2(AccelStepper::DRIVER, 7, 6);
 AccelStepper stepper3(AccelStepper::DRIVER, 5, 4);
 
-byte 123[4];
+byte motor[4];
 bool isStill = true;
 
-void setup() { 
-   
-Serial.begin(9600);
+void setup() {
+
+  Serial.begin(9600);
 
   stepper1.setMaxSpeed(3000);
   stepper1.setAcceleration(500);
@@ -21,31 +21,37 @@ Serial.begin(9600);
 }
 
 void loop() {
-if (Serial.available() > 2) {
+  if (Serial.available() > 4) {
     isStill = false;
-    123[0] = Serial.read();
-    123[1] = Serial.read();
-    123[2] = Serial.read();
-    123[3] = Serial.read(); 
-}
+    motor[0] = Serial.read();
+    motor[1] = Serial.read();
+    motor[2] = Serial.read();
+    motor[3] = Serial.read();
 
-if(isStill == false){
-  if(123[0] == 'a'){
-    if (stepper1.distanceToGo() == 0 && stepper2.distanceToGo() == 0 && stepper3.distanceToGo() == 0){
-    stepper1.moveTo(123[1]);
-    stepper2.moveTo(123[2]);
-    stepper3.moveTo(123[3]);
-    delay(1000);
+    Serial.write(motor[0]);
+    Serial.write(motor[1]);
+    Serial.write(motor[2]);
+    Serial.write(motor[3]);
+
+  }
+
+  if (isStill == false) {
+    if (motor[0] == 'a') {
+      if (stepper1.distanceToGo() == 0 && stepper2.distanceToGo() == 0 && stepper3.distanceToGo() == 0) {
+        stepper1.moveTo(motor[1] * 10);
+        stepper2.moveTo(motor[2] * 10);
+        stepper3.moveTo(motor[3] * 10);
+        //    delay(1000);
+      }
     }
+
+    stepper1.run();
+    stepper2.run();
+    stepper3.run();
   }
-   
-  stepper1.run();
-  stepper2.run();
-  stepper3.run();
-  }
-  
- if (!Serial.available()) {
-    isStill == true;
+
+  if (!Serial.available()) {
+    isStill = true;
   }
 }
 
