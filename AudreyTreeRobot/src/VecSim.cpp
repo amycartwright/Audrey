@@ -89,9 +89,9 @@ void VecSim::draw(){
     ofDrawArrow(m[2], br[2], 4);
     
     
-    w[0] = (br[0] - m[0]).length();
-    w[1] = (br[1] - m[1]).length();
-    w[2] = (br[2] - m[2]).length();
+    w.x = (br[0] - m[0]).length();
+    w.y = (br[1] - m[1]).length();
+    w.z = (br[2] - m[2]).length();
     
     ofPopMatrix();
 }
@@ -99,7 +99,7 @@ void VecSim::draw(){
 void VecSim::calculate(int x, int y, bool pressed){
     
     if (pressed) {
-        //every time the mouse is dragged, track the change
+        //every time the tubes move, track the change
         //accumulate the changes inside of curRot through multiplication
         ofQuaternion yRot(  (x-lastPos.x) * scale_rot, ofVec3f(0,1,0));
         ofQuaternion xRot( -(y-lastPos.y) * scale_rot, ofVec3f(1,0,0));

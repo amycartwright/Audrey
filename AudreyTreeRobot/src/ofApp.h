@@ -26,6 +26,8 @@ class ofApp : public ofBaseApp{
     ofxCvGrayscaleImage gray1, gray2;	//Decimated grayscaled images
     ofxCvFloatImage flowX, flowY;		//Resulted optical flow in x and y axes
     
+    void exit();
+    
     Message message;
     VecSim vecSim;
     

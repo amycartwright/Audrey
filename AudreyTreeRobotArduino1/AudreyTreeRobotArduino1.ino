@@ -37,11 +37,6 @@ void setup() {
 
 void loop() {
 
-//    if (millis() > wait){
-//      Serial.print('F');
-//      wait += 5000;
-//    }
-
   while (Serial.available()){ 
     int current = Serial.read();
     if(current == 'S' && state == READ_DONE) {
@@ -86,18 +81,21 @@ void loop() {
   if (isStill == false && messageComplete) {
     messageComplete = false;
     if (scene == 'a') {
-//      if (stepper1.distanceToGo() == 0 && stepper2.distanceToGo() == 0 && stepper3.distanceToGo() == 0) {
         stepper1.moveTo(motor[0]);
         stepper2.moveTo(motor[1]);
         stepper3.moveTo(motor[2]);
-//      }
-    }
+    }else if (scene == 'r') {
+      stepper1.moveTo(-stepper1.currentPosition());   
+      stepper2.moveTo(-stepper2.currentPosition());   
+      stepper3.moveTo(-stepper3.currentPosition());   
+      
+   }
 
-    stepper1.run();
+  
+  }
+  stepper1.run();
     stepper2.run();
     stepper3.run();
-  }
-
 //  if (!Serial.available()) {
 //    isStill = true;
 //  }

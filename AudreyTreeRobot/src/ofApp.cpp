@@ -43,10 +43,10 @@ void ofApp::setup()
     gui.add(showWebCam.set("Show Web Cam Image", false));
     gui.add(showSoundPosition.set("Show SoundPosition", true));
     gui.add(vecSim.scale_rot.set("scale rot", 0.045, 0, 1));
-    gui.add(vecSim.motor_rad.set("motor radius", 50, 10, 500));
-    gui.add(vecSim.base_rad.set("base radius", 50, 10, 500));
-    gui.add(vecSim.base_height.set("base height", 50, 10, 500));
-    gui.add(toSteps.set("to steps scaling", 1000, 10, 1000));
+    gui.add(vecSim.motor_rad.set("motor radius", 190, 10, 500));
+    gui.add(vecSim.base_rad.set("base radius", 200, 10, 500));
+    gui.add(vecSim.base_height.set("base height", 225, 10, 500));
+    gui.add(toSteps.set("to steps scaling", 10, 10, 1000));
     gui.add(update_vecSys.setup("update base/motor position"));
     
     update_vecSys.addListener(this, &ofApp::upd_vecSysPressed);
@@ -184,6 +184,7 @@ void ofApp::draw(){
     
     if(guiDraw) gui.draw();
     
+    message.draw();
     //If flow is detected find the average flow and increase to get more movement
     if (numOfEntries>0){
         avg = sum / numOfEntries;
@@ -238,13 +239,13 @@ void ofApp::draw(){
     //Send data to the vecSim to calculate the robots position
     vecSim.calculate(afterMapping.x, afterMapping.y, shiftKey);
 
-    ofVec3f toSend = ofVec3f(vecSim.w[0],vecSim.w[1],vecSim.w[2]).scale(toSteps);
+    ofVec3f toSend = (vecSim.w - vecSim.base_height) * toSteps;
     
     //For debuging 
     if (soundScore.getPosition() > 0){
         message.sceneOne(toSend);
     }
-    
+    ofDrawBitmapStringHighlight(ofToString((vecSim.w - vecSim.base_height)), 20, 80);
     /*
      //Choreographed movement
      //Begin sending data to arduino at scheduled intervals
@@ -308,13 +309,22 @@ void ofApp::keyPressed(int key){
         case ' ':
         vecSim.origin.z = 0;
         break;
-        
+            
+        case 'g':
+            message.toggleGui();
+        break;
+
+            
         case OF_KEY_LEFT_SHIFT:
         shiftKey = true;
         break;
             
             case 's':
-            message.setMessage('a', ofVec3f(10,20,30));
+            message.setMessage('a', ofVec3f(0,200,0));
+            message.writeMessage(message.msg);
+            break;
+        case 'S':
+            message.setMessage('a', ofVec3f(0,500,0));
             message.writeMessage(message.msg);
             break;
     }
@@ -333,4 +343,8 @@ void ofApp::keyReleased(int key){
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
     
     vecSim.origin.z += scrollY;
+}
+//--------------------------------------------------------------
+void ofApp::exit(){
+//    message.sendReset();
 }

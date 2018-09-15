@@ -11,6 +11,18 @@ void Message::setup(){
     //setup for the serial connection to the arduino IDE.
     serial.setup(1, 57600);
     serial.listDevices();
+    
+    gui.setup("Serial", "serialSettings.xml");
+    
+    gui.add(offset.set("Offset", {0,0,0}, {-1000,-1000, -1000}, {1000, 1000, 1000}));
+    offset.addListener(this, &Message::offsetChanged);
+//    gui.loadFromFile("serialSettings.xml");
+    
+}
+//--------------------------------------------------------------
+void Message::offsetChanged(ofVec3f&){
+    setMessage('a', ofVec3f(0,0,0));
+    writeMessage(msg);
 }
 //--------------------------------------------------------------
 void Message::sceneOne(ofVec3f avg){
@@ -69,22 +81,30 @@ void Message::update(){
     }
 }
 
-
+//--------------------------------------------------------------
+void Message::draw(){
+    if(bDrawGui){
+        gui.draw();
+    }
+}
 //--------------------------------------------------------------
 void Message::setMessage(char scene, ofVec3f avg){
     
     msg = "S"; // start
     msg += ofToString(scene); // scene
     msg += "x";
-    msg += ofToString((int) avg.x);
+    msg += ofToString((int) (avg.x + offset->x));
     msg += "y";
-    msg += ofToString((int) avg.y);
+    msg += ofToString((int) (avg.y + offset->y));
     msg += "z";
-    msg += ofToString((int) avg.z);
+    msg += ofToString((int) (avg.z + offset->z));
     msg += "E"; // end
     cout << msg << endl;
 }
-
+//--------------------------------------------------------------
+void Message::sendReset(){
+    writeMessage("SrE");
+}
 //--------------------------------------------------------------
 void Message::writeMessage(string message){
     
@@ -93,4 +113,8 @@ void Message::writeMessage(string message){
     copy(message.begin(), message.end(), buffer);
     serial.writeBytes(buffer, size);
 
+}
+//--------------------------------------------------------------
+void Message::toggleGui(){
+    bDrawGui ^= true;
 }

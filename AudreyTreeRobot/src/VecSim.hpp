@@ -47,7 +47,7 @@ class VecSim{
     
     ofQuaternion systemRot;
     
-    float w[3];
+    ofVec3f w;
     
     
     ofParameter<float> scale_rot;
