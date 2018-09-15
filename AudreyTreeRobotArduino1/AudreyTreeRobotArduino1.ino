@@ -12,6 +12,15 @@ bool isStill = true;
 char ignoreX, ignoreY, ignoreZ;
 unsigned long wait;
 
+enum State{
+  READ_SCENE = 0,
+  READ_X,
+  READ_Y,
+  READ_Z,
+  READ_DONE
+  }state = READ_DONE;
+
+
 void setup() {
 
   Serial.begin(57600);
@@ -29,31 +38,59 @@ void setup() {
 void loop() {
 
 //    if (millis() > wait){
-//      Serial.write('F');
+//      Serial.print('F');
 //      wait += 5000;
 //    }
 
-  if (Serial.available() && Serial.read() == 'S') {
-    isStill = false;
-    scene = Serial.read();
-    if (Serial.read() == 'x') motor[0] = Serial.parseInt();
-    if (Serial.read() == 'y') motor[1] = Serial.parseInt();
-    if (Serial.read() == 'z') motor[2] = Serial.parseInt();
-
-    if (messageComplete = (Serial.read() == 'E')) Serial.write('F');
-        Serial.write(motor[0]);
-        Serial.write(motor[1]);
-        Serial.write(motor[2]);
+  while (Serial.available()){ 
+    int current = Serial.read();
+    if(current == 'S' && state == READ_DONE) {
+      state = READ_SCENE;
+      messageComplete = false;
+      break;
+    }
+ 
+    if (current == 'x'){
+      state = READ_X;
+    }else if (current == 'y'){
+      state = READ_Y;
+    }else if (current == 'z'){
+      state = READ_Z;
+    }else if(current == 'E'){
+      state = READ_DONE;
+      isStill = false;
+      messageComplete = true;
+    }
+    if(state == READ_SCENE){
+      scene = current;
+      
+    }else
+    if(state == READ_X){
+      motor[0] = Serial.parseInt();
+      Serial.print(motor[0]);
+      Serial.print(", ");
+    }else
+    if(state == READ_Y){
+      motor[1] = Serial.parseInt();
+      Serial.print(motor[1]);
+      Serial.print(", ");
+    }else
+    if(state == READ_Z){
+      motor[2] = Serial.parseInt();
+      Serial.print(motor[2]);
+      Serial.println("");
+    }
   }
+  
 
   if (isStill == false && messageComplete) {
     messageComplete = false;
     if (scene == 'a') {
-      if (stepper1.distanceToGo() == 0 && stepper2.distanceToGo() == 0 && stepper3.distanceToGo() == 0) {
+//      if (stepper1.distanceToGo() == 0 && stepper2.distanceToGo() == 0 && stepper3.distanceToGo() == 0) {
         stepper1.moveTo(motor[0]);
         stepper2.moveTo(motor[1]);
         stepper3.moveTo(motor[2]);
-      }
+//      }
     }
 
     stepper1.run();
@@ -61,8 +98,8 @@ void loop() {
     stepper3.run();
   }
 
-  if (!Serial.available()) {
-    isStill = true;
-  }
+//  if (!Serial.available()) {
+//    isStill = true;
+//  }
 }
 

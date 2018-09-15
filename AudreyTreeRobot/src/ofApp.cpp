@@ -3,7 +3,7 @@
 
 void ofApp::setup()
 {
-    //ofSetFullscreen(true);
+    ofSetFullscreen(true);
     
     //setup for the webcam
     video.listDevices();
@@ -38,7 +38,7 @@ void ofApp::setup()
     gui.add(showAverage.set("Show Average", true));
     gui.add(showFlow.set("Show Flow", false));
     gui.add(threshold.set("Threshold", 1, 0, 20));
-    gui.add(dampen.set("Dampen", 0.1, 0, 2));
+    gui.add(dampen.set("Dampen", 0.01, 0, 2));
     gui.add(showVecSim.set("Show Vector Simulation", true));
     gui.add(showWebCam.set("Show Web Cam Image", false));
     gui.add(showSoundPosition.set("Show SoundPosition", true));
@@ -46,7 +46,7 @@ void ofApp::setup()
     gui.add(vecSim.motor_rad.set("motor radius", 50, 10, 500));
     gui.add(vecSim.base_rad.set("base radius", 50, 10, 500));
     gui.add(vecSim.base_height.set("base height", 50, 10, 500));
-    gui.add(toSteps.set("to steps scaling", 50, 10, 500));
+    gui.add(toSteps.set("to steps scaling", 1000, 10, 1000));
     gui.add(update_vecSys.setup("update base/motor position"));
     
     update_vecSys.addListener(this, &ofApp::upd_vecSysPressed);
@@ -54,7 +54,7 @@ void ofApp::setup()
     vecSim.setup();
     
     //setup for sound
-    soundScore.load("VocalEditAmy.wav");
+    soundScore.load("Jakob_Glock_-_Granular_Voices.wav");
     
     
 } /*END*/
@@ -62,13 +62,7 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    if(message.serial.available()) {
-        int size = message.serial.available();
-        unsigned char bytes[size];
-        message.serial.readBytes(bytes, size);
-        cout << "serial: " << bytes[1] << endl;
-        message.update(); // check if arduino serial is free
-    }
+    message.update(); // check if arduino serial is free
 
     video.update(); //Decode the new frame if needed
     film.update();
@@ -246,6 +240,7 @@ void ofApp::draw(){
 
     ofVec3f toSend = ofVec3f(vecSim.w[0],vecSim.w[1],vecSim.w[2]).scale(toSteps);
     
+    //For debuging 
     if (soundScore.getPosition() > 0){
         message.sceneOne(toSend);
     }
@@ -286,10 +281,6 @@ void ofApp::draw(){
                                 }
      
      */
-    
-//    if(ofGetFrameNum() % 20 == 0){
-//        cout << toSend << endl;
-//    }
     
 } /*END*/
 

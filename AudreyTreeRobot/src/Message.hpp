@@ -28,4 +28,5 @@ class Message{
     string msg;
     void setMessage(char, ofVec3f);
     void writeMessage(string);
+    bool expectMessage = true;
 };

@@ -16,32 +16,13 @@ void Message::setup(){
 void Message::sceneOne(ofVec3f avg){
     //reduce the framerate when sending message to ensure the arduino is not overwhelmed
     //Sends message indicating specific action to arduino as well as movement data.
-    /*
-    if(flag){
-        flag = false;
-        
-         serial.writeByte(char('S')); // start
-         serial.writeByte(char('a')); // scene
-         serial.writeByte(char('x'));
-         serial.writeByte(int ((avg.x / 500) * 255)); //Here 500 should be changed to the maximum possible wire length
-         serial.writeByte(char('y'));
-         serial.writeByte(int ((avg.y / 500) * 255));
-         serial.writeByte(char('z'));
-         serial.writeByte(int ((avg.z / 500) * 255));
-         serial.writeByte(char('E')); // end
-     }
-         */
-        
+    
+        if(ofGetFrameNum() % 5 == 0){
         setMessage('a', avg);
         
         writeMessage(msg);
     
-    //    if(ofGetFrameNum() % 20 == 0){
-    //        serial.writeByte(char('a'));
-    //        serial.writeByte(avg.x*0.1);
-    //        serial.writeByte(avg.y*0.1);
-    //        serial.writeByte(avg.z*0.1);
-    //    }
+        }
 }
 //--------------------------------------------------------------
 void Message::sceneTwo(ofVec3f storedData){
@@ -78,8 +59,14 @@ void Message::sceneFour(ofVec3f avg){
 
 //--------------------------------------------------------------
 void Message::update(){
-    
-    flag = (serial.readByte() == 'F');
+    if(serial.available() && expectMessage){
+        cout << "serial Feedback: ";
+    }
+    while(serial.available()) {
+         unsigned char b = serial.readByte();
+        expectMessage = (b == '\n');
+        cout << b;
+    }
 }
 
 
@@ -101,14 +88,9 @@ void Message::setMessage(char scene, ofVec3f avg){
 //--------------------------------------------------------------
 void Message::writeMessage(string message){
     
-    if(true){
-        flag = false;
-        
-      // if(ofGetFrameNum() % 20 == 0){
-        int size = message.size();
-        unsigned char buffer[size];
-        copy(message.begin(), message.end(), buffer);
-        serial.writeBytes(buffer, size);
-       //}
-    }
+    int size = message.size();
+    unsigned char buffer[size];
+    copy(message.begin(), message.end(), buffer);
+    serial.writeBytes(buffer, size);
+
 }

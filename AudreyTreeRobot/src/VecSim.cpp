@@ -54,12 +54,6 @@ void VecSim::draw(){
     
     //apply the quaternion's rotation to the viewport and draw the sphere
     ofRotate(angle, axis.x, axis.y, axis.z);
-    
-    //    systemRot.getRotate(angle, axis);
-    //    for (int i = 0; i < 3; i++) {
-    //        b[i].rotate(angle, axis);
-    //    }
-    //    normal.rotate(angle, axis);
 
     systemRot.getRotate(angle, axis);
     
