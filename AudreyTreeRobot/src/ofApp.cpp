@@ -42,7 +42,7 @@ void ofApp::setup()
     gui.add(showVecSim.set("Show Vector Simulation", true));
     gui.add(showWebCam.set("Show Web Cam Image", false));
     gui.add(showSoundPosition.set("Show SoundPosition", true));
-    gui.add(vecSim.scale_rot.set("scale rot", 0.125, 0, 1));
+    gui.add(vecSim.scale_rot.set("scale rot", 0.045, 0, 1));
     gui.add(vecSim.motor_rad.set("motor radius", 50, 10, 500));
     gui.add(vecSim.base_rad.set("base radius", 50, 10, 500));
     gui.add(vecSim.base_height.set("base height", 50, 10, 500));
