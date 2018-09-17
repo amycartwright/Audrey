@@ -3,8 +3,7 @@
 
 void ofApp::setup()
 {
-    ofSetFullscreen(true);
-    
+
     //setup for the webcam
     video.listDevices();
     video.setDeviceID(0);
@@ -242,46 +241,50 @@ void ofApp::draw(){
     ofVec3f toSend = (vecSim.w - vecSim.base_height) * toSteps;
     
     //For debuging 
-    if (soundScore.getPosition() > 0){
-        message.sceneOne(toSend);
-    }
+//    if (soundScore.getPosition() > 0){
+//        message.sceneOne(toSend);
+//    }
+    
     ofDrawBitmapStringHighlight(ofToString((vecSim.w - vecSim.base_height)), 20, 80);
-    /*
+    
+    
      //Choreographed movement
      //Begin sending data to arduino at scheduled intervals
-     if (soundScore.getPosition() > 0.064 && soundScore.getPosition() < 0.077){
+     if (soundScore.getPosition() > 0.062 && soundScore.getPosition() < 0.074){
          message.sceneOne(toSend);
         }
     
-        else if (soundScore.getPosition() > 0.135 && soundScore.getPosition() < 0.216){
+        else if (soundScore.getPosition() > 0.131 && soundScore.getPosition() < 0.209){
             message.sceneOne(toSend);
         }
   
-            else if(soundScore.getPosition() > 0.216 && soundScore.getPosition() < 0.302){
-                    message.sceneOne(toSend);
+            else if(soundScore.getPosition() > 0.209 && soundScore.getPosition() < 0.294){
+                    storedData.push_back(toSend);
             }
 
-                else if (soundScore.getPosition() > 0.302 && soundScore.getPosition() < 0.400){
-                    message.sceneOne(toSend);
+                else if (soundScore.getPosition() > 0.294 && soundScore.getPosition() < 0.385){
+                    count++;
+                    message.sceneTwo(storedData[count % storedData.size()]);
+                    cout << "sd:" << storedData[count % storedData.size()]  << endl;
                 }
 
-                    else if(soundScore.getPosition() > 0.400 && soundScore.getPosition() < 0.476){
+                    else if(soundScore.getPosition() > 0.385 && soundScore.getPosition() < 0.460){
                         message.sceneOne(toSend);
                     }
 
-                        else if (soundScore.getPosition() > 0.476 && soundScore.getPosition() < 0.602){
+                        else if (soundScore.getPosition() > 0.460 && soundScore.getPosition() < 0.581){
                             message.sceneOne(toSend);
                         }
     
-                            else if (soundScore.getPosition() > 0.602 && soundScore.getPosition() < 0.796){
+                            else if (soundScore.getPosition() > 0.581 && soundScore.getPosition() < 0.770){
                                 message.sceneOne(toSend);
                             }
     
-                                else if (soundScore.getPosition() > 0.796 && soundScore.getPosition() < 0.970){
+                                else if (soundScore.getPosition() > 0.770 && soundScore.getPosition() < 0.970){
                                     message.sceneOne(toSend);
                                 }
      
-     */
+    
     
 } /*END*/
 

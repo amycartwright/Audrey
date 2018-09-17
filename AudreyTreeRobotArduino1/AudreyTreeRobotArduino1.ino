@@ -96,8 +96,5 @@ void loop() {
   stepper1.run();
     stepper2.run();
     stepper3.run();
-//  if (!Serial.available()) {
-//    isStill = true;
-//  }
 }
 

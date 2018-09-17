@@ -74,4 +74,7 @@ class ofApp : public ofBaseApp{
     bool shiftKey;
     ofVec3f vec;
     
+    vector <ofVec3f> storedData;
+    int count;
+    
 };
