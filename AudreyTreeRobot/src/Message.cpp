@@ -29,31 +29,34 @@ void Message::sceneOne(ofVec3f avg){
     //reduce the framerate when sending message to ensure the arduino is not overwhelmed
     //Sends message indicating specific action to arduino as well as movement data.
     
-        if(ofGetFrameNum() % 5 == 0){
+    if(ofGetFrameNum() % 5 == 0){
+            
         setMessage('a', avg);
-        
         writeMessage(msg);
     
-        }
+    }
 }
 //--------------------------------------------------------------
 void Message::sceneTwo(ofVec3f storedData){
     //Sends movement data that has been stored in a buffer. Allows the arms to move when the dancer is not
     if(ofGetFrameNum() % 20 == 0){
+        
+        setMessage('a', storedData);
+        writeMessage(msg);
       
     }
 }
 //--------------------------------------------------------------
 void Message::sceneThree(ofVec3f avg){
     
-    if(ofGetFrameNum() % 20 == 0){
+    if(ofGetFrameNum() % 5 == 0){
      
     }
 }
 //--------------------------------------------------------------
 void Message::sceneFour(ofVec3f avg){
     
-    if(ofGetFrameNum() % 20 == 0){
+    if(ofGetFrameNum() % 5 == 0){
     
     }
 }

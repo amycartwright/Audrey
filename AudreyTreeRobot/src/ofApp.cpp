@@ -37,7 +37,7 @@ void ofApp::setup()
     gui.add(showAverage.set("Show Average", true));
     gui.add(showFlow.set("Show Flow", false));
     gui.add(threshold.set("Threshold", 1, 0, 20));
-    gui.add(dampen.set("Dampen", 0.01, 0, 2));
+    gui.add(dampen.set("Dampen", 0.1, 0, 2));
     gui.add(showVecSim.set("Show Vector Simulation", true));
     gui.add(showWebCam.set("Show Web Cam Image", false));
     gui.add(showSoundPosition.set("Show SoundPosition", true));
@@ -45,7 +45,7 @@ void ofApp::setup()
     gui.add(vecSim.motor_rad.set("motor radius", 190, 10, 500));
     gui.add(vecSim.base_rad.set("base radius", 200, 10, 500));
     gui.add(vecSim.base_height.set("base height", 225, 10, 500));
-    gui.add(toSteps.set("to steps scaling", 10, 10, 1000));
+    gui.add(toSteps.set("to steps scaling", 40, 10, 50));
     gui.add(update_vecSys.setup("update base/motor position"));
     
     update_vecSys.addListener(this, &ofApp::upd_vecSysPressed);
@@ -240,14 +240,26 @@ void ofApp::draw(){
 
     ofVec3f toSend = (vecSim.w - vecSim.base_height) * toSteps;
     
+    //Attempt to keep the wires tight
+    float percentage = -0.1;
+    
+    if(toSend.x > 0) toSend.x += toSend.x * percentage;
+    else if(toSend.x < 0) toSend.x += toSend.x * percentage;
+    
+    if(toSend.y > 0) toSend.y += toSend.y * percentage;
+    else if(toSend.y < 0) toSend.y += toSend.y * percentage;
+    
+    if(toSend.z > 0) toSend.z += toSend.z * percentage;
+    else if(toSend.z < 0) toSend.z += toSend.z * percentage;
+    
     //For debuging 
-//    if (soundScore.getPosition() > 0){
-//        message.sceneOne(toSend);
-//    }
+    if (soundScore.getPosition() > 0){
+        message.sceneOne(toSend);
+    }
     
     ofDrawBitmapStringHighlight(ofToString((vecSim.w - vecSim.base_height)), 20, 80);
     
-    
+    /*
      //Choreographed movement
      //Begin sending data to arduino at scheduled intervals
      if (soundScore.getPosition() > 0.062 && soundScore.getPosition() < 0.074){
@@ -283,6 +295,8 @@ void ofApp::draw(){
                                 else if (soundScore.getPosition() > 0.770 && soundScore.getPosition() < 0.970){
                                     message.sceneOne(toSend);
                                 }
+     //reduce end timing to incorporate lag in motors
+     */
      
     
     
